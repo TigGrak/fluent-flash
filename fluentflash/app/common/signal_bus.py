@@ -6,6 +6,7 @@ class SignalBus(QObject):
     """ Signal bus """
     switch_page = pyqtSignal(object)
     runtime_change = pyqtSignal(dict)
+    refresh_device = pyqtSignal()
 
 class SignalKey():
     """ Signal key """

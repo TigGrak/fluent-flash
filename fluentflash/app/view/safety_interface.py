@@ -45,8 +45,7 @@ class SafetyInterface(MyDialog, Ui_SafetyInterface):
         self.BackupAExtractProgress.hide()
 
         # disable button
-        self.ButtonEtractAPKFile.setEnabled(False)
-        self.ButtonBackupData.setEnabled(False)
+        self.__setAPKButtonEnable(False)
 
 
 
@@ -56,6 +55,21 @@ class SafetyInterface(MyDialog, Ui_SafetyInterface):
         self.get_app_list_thread.GA_signal.connect(self.callback_refreshAPPList)
         self.AppList.itemSelectionChanged.connect(self.appItemSelectionChanged)
 
+    def __setAPKButtonEnable(self,state):
+        self.ButtonEtractAPKFile.setEnabled(state)
+        self.ButtonBackupData.setEnabled(state)
+
+    def __setProgressVisible(self,state,reboot=True):
+        self.RefreshProgress.setVisible(state)
+        self.BackupAExtractProgress.setVisible(state)
+        if reboot:
+            self.RefreshProgress.stop()
+            self.RefreshProgress.start()
+            self.BackupAExtractProgress.setValue(0)
+
+
+
+
     def appItemSelectionChanged(self):
         """app item selection changed,get selected app info"""
         select = self.AppList.selectedItems()
@@ -64,12 +78,7 @@ class SafetyInterface(MyDialog, Ui_SafetyInterface):
         for i in range(int(select_length)):
             select_app[select[i*2].text()] = select[i*2+1].text()
 
-        if select_app:
-            self.ButtonEtractAPKFile.setEnabled(True)
-            self.ButtonBackupData.setEnabled(True)
-        else:
-            self.ButtonEtractAPKFile.setEnabled(False)
-            self.ButtonBackupData.setEnabled(False)
+        self.__setAPKButtonEnable(True if select_app else False)
 
         #print(select_app)
 
@@ -92,12 +101,10 @@ class SafetyInterface(MyDialog, Ui_SafetyInterface):
                 # turn to connect interface
                 signalBus.switch_page.emit(rt.page_dict['connect'])
             return
-        self.ButtonEtractAPKFile.setEnabled(False)
-        self.ButtonBackupData.setEnabled(False)
+
+        self.__setAPKButtonEnable(False)
+        self.__setProgressVisible(True)
         self.ButtonRefresh.setEnabled(False)
-        self.RefreshProgress.stop()
-        self.RefreshProgress.start()
-        self.RefreshProgress.show()
         self.get_app_list_thread.start()
 
     def callback_refreshAPPList(self,res):
@@ -108,16 +115,16 @@ class SafetyInterface(MyDialog, Ui_SafetyInterface):
         self.AppList.clearContents()
         self.AppList.setRowCount(0)
 
+        self.__setProgressVisible(False)
+        self.ButtonRefresh.setEnabled(True)
+
         if status == signalKey.SUCCESS:
             for i in res['info']:
                 self.AppList.insertRow(0)
                 self.AppList.setItem(0, 0, QTableWidgetItem(i))
                 self.AppList.setItem(0, 1, QTableWidgetItem(res['info'][i]))
-            self.RefreshProgress.hide()
-            self.ButtonRefresh.setEnabled(True)
+
         elif status == signalKey.ERROR:
-            self.RefreshProgress.hide()
-            self.ButtonRefresh.setEnabled(True)
             error = res.get('error')
             self.showMessageDialog(self.t.error_title, error)
 
@@ -130,7 +137,6 @@ class GetApps(QThread):
 
     def run(self):
         self.GA_signal.emit(adb.getApps())
-        #adb.exe: no devices/emulators found
 
 
 

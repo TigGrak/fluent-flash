@@ -12,10 +12,9 @@ from app.view.Ui_ConnectInterface import Ui_ConnectInterface
 from qfluentwidgets import FluentIcon,MessageBox,StateToolTip
 from app.tool.adb import adb
 from app.common.translator import Translator
-from app.lib.more_dialog import chooseDialog
 from app.common.runtime import rt
 from app.lib.myDialog import MyDialog
-from app.common.signal_bus import signalKey
+from app.common.signal_bus import signalKey,signalBus
 
 
 # MyDialog is a QWidget's subclass,according to mro,QWidget can omit
@@ -35,6 +34,7 @@ class ConnectInterface(MyDialog, Ui_ConnectInterface):
 
 
         self.__initUI()
+        self.__connectSignal()
 
 
 
@@ -49,19 +49,20 @@ class ConnectInterface(MyDialog, Ui_ConnectInterface):
         self.setShadowEffect(self.InfoCard5)
         self.setShadowEffect(self.InfoCard6)
 
-
-
         # hide GetDeviceInfoIndeterminateProgressBar and GetROOTPermissions
         self.GetDeviceInfoIndeterminateProgressBar.hide()
         self.GetROOTPermissions.hide()
 
+
+
+
+    def __connectSignal(self):
         # connect GetROOTPermissions checkbox
         self.GetROOTPermissions.clicked.connect(self.ifGetROOTPermissionsChecked)
         # connect find device button
         self.ConnectPrimaryToolButton.clicked.connect(self.startT_findDevice)
-
-
-
+        # connect refresh device signal
+        signalBus.refresh_device.connect(self.callback_refreshDevice)
 
 
     def setShadowEffect(self, card: QWidget):
@@ -74,6 +75,7 @@ class ConnectInterface(MyDialog, Ui_ConnectInterface):
 
     def onGetROOT(self,disable=False):
         """set state tool tip when getting root"""
+
         if self.get_ROOT_state_tool_tip:
             if disable:
                 self.get_ROOT_state_tool_tip.setContent(
@@ -98,23 +100,6 @@ class ConnectInterface(MyDialog, Ui_ConnectInterface):
         else:
             self.onGetROOT(disable=True)
             rt.setRoot(False)
-
-    def showMessageDialog(self,title,content):
-        """show message dialog"""
-        w = MessageBox(title, content, self.window())
-        if w.exec():
-            return True
-        else:
-            return False
-
-    def showChooseDialog(self,title,content):
-        #TODO:BUG
-        """choose dialog coding by myself,BUG"""
-        w = chooseDialog(title, content, self.window())
-        if w.exec():
-            return True
-        else:
-            return False
 
     def callback_getDeviceInfo(self,device_info):
         """callback function,update device info ui"""
@@ -144,13 +129,15 @@ class ConnectInterface(MyDialog, Ui_ConnectInterface):
 
         if device_dict.get('status') == signalKey.FOUND:
 
+            #TODO
             device_id = list(device_dict['devices'].keys())[0]
+            rt.setDeviceId(device_id)
             # if device_id is a ip ,add to IPEditableComboBox
             if device_id.find(':') != -1:
                 if self.IPEditableComboBox.findText(device_id) == -1:
                     self.IPEditableComboBox.addItem(device_id)
 
-            self.get_device_info_thread = GetDeviceInfoThread(device_id)
+            self.get_device_info_thread = GetDeviceInfoThread()
             self.get_device_info_thread.GDI_signal.connect(self.callback_getDeviceInfo)
             self.get_device_info_thread.start()
             #device_info = adb.getDeviceInfo(device_id)
@@ -174,20 +161,8 @@ class ConnectInterface(MyDialog, Ui_ConnectInterface):
                 self.showMessageDialog(self.t.error_title, self.t.error_get_superuser_failed)
 
 
-
-
-
-    def startT_findDevice(self):
-        """start thread to find device"""
-        self.onGetROOT(disable=True)
-        # get IPEditableComboBox value
-        host = self.IPEditableComboBox.currentText()
-        if host == '':
-            host = None
-
-        self.check_device_thread = FindDeviceThread(host)
-        self.check_device_thread.FDT_signal.connect(self.callback_findDevice)
-
+    def callback_refreshDevice(self):
+        rt.setRoot(False)
         # init ui
         self.ConnectPrimaryToolButton.setEnabled(False)
         self.GetROOTPermissions.setChecked(False)
@@ -195,6 +170,19 @@ class ConnectInterface(MyDialog, Ui_ConnectInterface):
         self.GetDeviceInfoIndeterminateProgressBar.show()
         self.GetDeviceInfoIndeterminateProgressBar.stop()
         self.GetDeviceInfoIndeterminateProgressBar.start()
+
+
+    def startT_findDevice(self):
+        """start thread to find device"""
+
+        self.onGetROOT(disable=True)
+        signalBus.refresh_device.emit()
+        # get IPEditableComboBox value
+        host = self.IPEditableComboBox.currentText()
+
+        host = None if host == '' else host
+        self.check_device_thread = FindDeviceThread(host)
+        self.check_device_thread.FDT_signal.connect(self.callback_findDevice)
 
         # start thread
         self.check_device_thread.start()
@@ -233,13 +221,14 @@ class FindDeviceThread(QThread):
 class GetDeviceInfoThread(QThread):
     GDI_signal = pyqtSignal(dict)
 
-    def __init__(self,device_id):
+    def __init__(self):
         super().__init__()
         self.device_info = {}
-        self.device_id = device_id
     def run(self):
-        self.device_info = adb.getDeviceInfo(self.device_id)
+        self.device_info = adb.getDeviceInfo()
         self.GDI_signal.emit(self.device_info)
+
+
 
 """QThread for try getting root"""
 class GettingROOTThread(QThread):
