@@ -14,8 +14,12 @@ from app.tool.adb import adb
 from app.common.translator import Translator
 from app.lib.more_dialog import chooseDialog
 from app.common.runtime import rt
+from app.lib.myDialog import MyDialog
+from app.common.signal_bus import signalKey
 
-class ConnectInterface(QWidget, Ui_ConnectInterface):
+
+# MyDialog is a QWidget's subclass,according to mro,QWidget can omit
+class ConnectInterface(MyDialog, Ui_ConnectInterface):
     def __init__(self,parent=None):
         super().__init__(parent=parent)
         self.t = Translator()
@@ -30,7 +34,12 @@ class ConnectInterface(QWidget, Ui_ConnectInterface):
         self.get_ROOT_state_tool_tip = None
 
 
+        self.__initUI()
 
+
+
+
+    def __initUI(self):
         # set ui
         self.ConnectPrimaryToolButton.setIcon(FluentIcon.UPDATE)
         self.setShadowEffect(self.InfoCard1)
@@ -40,8 +49,7 @@ class ConnectInterface(QWidget, Ui_ConnectInterface):
         self.setShadowEffect(self.InfoCard5)
         self.setShadowEffect(self.InfoCard6)
 
-        # connect find device button
-        self.ConnectPrimaryToolButton.clicked.connect(self.startT_findDevice)
+
 
         # hide GetDeviceInfoIndeterminateProgressBar and GetROOTPermissions
         self.GetDeviceInfoIndeterminateProgressBar.hide()
@@ -49,6 +57,9 @@ class ConnectInterface(QWidget, Ui_ConnectInterface):
 
         # connect GetROOTPermissions checkbox
         self.GetROOTPermissions.clicked.connect(self.ifGetROOTPermissionsChecked)
+        # connect find device button
+        self.ConnectPrimaryToolButton.clicked.connect(self.startT_findDevice)
+
 
 
 
@@ -123,6 +134,7 @@ class ConnectInterface(QWidget, Ui_ConnectInterface):
         self.InfoText1_6.setText(
             f"{device_info['device_connect_type']}\n{device_info['device_id']}\n{device_info['adb_version']}\n{device_info['windows_version']}")
 
+        rt.setDeviceId(device_info['device_id'])
         self.GetDeviceInfoIndeterminateProgressBar.hide()
         self.GetROOTPermissions.show()
         self.ConnectPrimaryToolButton.setEnabled(True)
@@ -130,7 +142,7 @@ class ConnectInterface(QWidget, Ui_ConnectInterface):
     def callback_findDevice(self,device_dict):
         """callback function,update find device ui"""
 
-        if device_dict.get('status') == 'FOUND':
+        if device_dict.get('status') == signalKey.FOUND:
 
             device_id = list(device_dict['devices'].keys())[0]
             # if device_id is a ip ,add to IPEditableComboBox
@@ -142,11 +154,11 @@ class ConnectInterface(QWidget, Ui_ConnectInterface):
             self.get_device_info_thread.GDI_signal.connect(self.callback_getDeviceInfo)
             self.get_device_info_thread.start()
             #device_info = adb.getDeviceInfo(device_id)
-        elif device_dict.get('status') == 'NOT_FOUND':
+        elif device_dict.get('status') == signalKey.NOT_FOUND:
             self.GetDeviceInfoIndeterminateProgressBar.hide()
             self.GetROOTPermissions.hide()
             self.ConnectPrimaryToolButton.setEnabled(True)
-            self.showMessageDialog(self.t.error_title, self.t.error_no_device)
+            self.showMessageDialog(self.t.error_title, self.t.error_device_not_found)
 
     def callback_getROOT(self, res:bool):
         """callback function,update get root ui"""

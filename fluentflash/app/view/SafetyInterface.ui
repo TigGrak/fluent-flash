@@ -19,7 +19,7 @@
      <x>10</x>
      <y>30</y>
      <width>901</width>
-     <height>801</height>
+     <height>771</height>
     </rect>
    </property>
    <property name="minimumSize">
@@ -50,13 +50,98 @@
      <property name="geometry">
       <rect>
        <x>30</x>
-       <y>40</y>
+       <y>30</y>
        <width>123</width>
        <height>38</height>
       </rect>
      </property>
      <property name="text">
-      <string>1234</string>
+      <string>Safety</string>
+     </property>
+    </widget>
+    <widget class="SubtitleLabel" name="SubtitleLabel">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>80</y>
+       <width>119</width>
+       <height>28</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Apps</string>
+     </property>
+    </widget>
+    <widget class="TableWidget" name="AppList">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>120</y>
+       <width>561</width>
+       <height>441</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="PrimaryPushButton" name="ButtonEtractAPKFile">
+     <property name="geometry">
+      <rect>
+       <x>240</x>
+       <y>580</y>
+       <width>131</width>
+       <height>32</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Extract APK File</string>
+     </property>
+    </widget>
+    <widget class="PrimaryPushButton" name="ButtonBackupData">
+     <property name="geometry">
+      <rect>
+       <x>460</x>
+       <y>580</y>
+       <width>131</width>
+       <height>32</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Backup Data</string>
+     </property>
+    </widget>
+    <widget class="PrimaryPushButton" name="ButtonRefresh">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>580</y>
+       <width>131</width>
+       <height>32</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Refresh</string>
+     </property>
+    </widget>
+    <widget class="IndeterminateProgressBar" name="RefreshProgress">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>570</y>
+       <width>570</width>
+       <height>4</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="ProgressBar" name="BackupAExtractProgress">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>570</y>
+       <width>570</width>
+       <height>4</height>
+      </rect>
+     </property>
+     <property name="val">
+      <double>0.000000000000000</double>
      </property>
     </widget>
    </widget>
@@ -64,14 +149,44 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>PushButton</class>
+   <extends>QPushButton</extends>
+   <header>qfluentwidgets</header>
+  </customwidget>
+  <customwidget>
+   <class>PrimaryPushButton</class>
+   <extends>PushButton</extends>
+   <header>qfluentwidgets</header>
+  </customwidget>
+  <customwidget>
    <class>ScrollArea</class>
    <extends>QScrollArea</extends>
    <header>qfluentwidgets</header>
    <container>1</container>
   </customwidget>
   <customwidget>
+   <class>SubtitleLabel</class>
+   <extends>QLabel</extends>
+   <header>qfluentwidgets</header>
+  </customwidget>
+  <customwidget>
    <class>TitleLabel</class>
    <extends>QLabel</extends>
+   <header>qfluentwidgets</header>
+  </customwidget>
+  <customwidget>
+   <class>ProgressBar</class>
+   <extends>QProgressBar</extends>
+   <header>qfluentwidgets</header>
+  </customwidget>
+  <customwidget>
+   <class>IndeterminateProgressBar</class>
+   <extends>QProgressBar</extends>
+   <header>qfluentwidgets</header>
+  </customwidget>
+  <customwidget>
+   <class>TableWidget</class>
+   <extends>QTableWidget</extends>
    <header>qfluentwidgets</header>
   </customwidget>
  </customwidgets>

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'D:\coding\myflashbox\app\view\SafetyInterface.ui'
+# Form implementation generated from reading ui file 'D:\project\fluentflash\fluentflash\app\view\SafetyInterface.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.9
 #
@@ -16,7 +16,7 @@ class Ui_SafetyInterface(object):
         SafetyInterface.setObjectName("SafetyInterface")
         SafetyInterface.resize(900, 800)
         self.ScrollArea = ScrollArea(SafetyInterface)
-        self.ScrollArea.setGeometry(QtCore.QRect(10, 30, 901, 801))
+        self.ScrollArea.setGeometry(QtCore.QRect(10, 30, 901, 771))
         self.ScrollArea.setMinimumSize(QtCore.QSize(0, 461))
         self.ScrollArea.setWidgetResizable(True)
         self.ScrollArea.setObjectName("ScrollArea")
@@ -25,8 +25,32 @@ class Ui_SafetyInterface(object):
         self.scrollAreaWidgetContents.setMinimumSize(QtCore.QSize(609, 10000))
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
         self.SafetyInterfaceTitle = TitleLabel(self.scrollAreaWidgetContents)
-        self.SafetyInterfaceTitle.setGeometry(QtCore.QRect(30, 40, 123, 38))
+        self.SafetyInterfaceTitle.setGeometry(QtCore.QRect(30, 30, 123, 38))
         self.SafetyInterfaceTitle.setObjectName("SafetyInterfaceTitle")
+        self.SubtitleLabel = SubtitleLabel(self.scrollAreaWidgetContents)
+        self.SubtitleLabel.setGeometry(QtCore.QRect(30, 80, 119, 28))
+        self.SubtitleLabel.setObjectName("SubtitleLabel")
+        self.AppList = TableWidget(self.scrollAreaWidgetContents)
+        self.AppList.setGeometry(QtCore.QRect(30, 120, 561, 441))
+        self.AppList.setObjectName("AppList")
+        self.AppList.setColumnCount(0)
+        self.AppList.setRowCount(0)
+        self.ButtonEtractAPKFile = PrimaryPushButton(self.scrollAreaWidgetContents)
+        self.ButtonEtractAPKFile.setGeometry(QtCore.QRect(240, 580, 131, 32))
+        self.ButtonEtractAPKFile.setObjectName("ButtonEtractAPKFile")
+        self.ButtonBackupData = PrimaryPushButton(self.scrollAreaWidgetContents)
+        self.ButtonBackupData.setGeometry(QtCore.QRect(460, 580, 131, 32))
+        self.ButtonBackupData.setObjectName("ButtonBackupData")
+        self.ButtonRefresh = PrimaryPushButton(self.scrollAreaWidgetContents)
+        self.ButtonRefresh.setGeometry(QtCore.QRect(20, 580, 131, 32))
+        self.ButtonRefresh.setObjectName("ButtonRefresh")
+        self.RefreshProgress = IndeterminateProgressBar(self.scrollAreaWidgetContents)
+        self.RefreshProgress.setGeometry(QtCore.QRect(20, 570, 570, 4))
+        self.RefreshProgress.setObjectName("RefreshProgress")
+        self.BackupAExtractProgress = ProgressBar(self.scrollAreaWidgetContents)
+        self.BackupAExtractProgress.setGeometry(QtCore.QRect(20, 570, 570, 4))
+        self.BackupAExtractProgress.setVal(0.0)
+        self.BackupAExtractProgress.setObjectName("BackupAExtractProgress")
         self.ScrollArea.setWidget(self.scrollAreaWidgetContents)
 
         self.retranslateUi(SafetyInterface)
@@ -35,6 +59,10 @@ class Ui_SafetyInterface(object):
     def retranslateUi(self, SafetyInterface):
         _translate = QtCore.QCoreApplication.translate
         SafetyInterface.setWindowTitle(_translate("SafetyInterface", "Form"))
-        self.SafetyInterfaceTitle.setText(_translate("SafetyInterface", "1234"))
-from qfluentwidgets import ScrollArea, TitleLabel
+        self.SafetyInterfaceTitle.setText(_translate("SafetyInterface", "Safety"))
+        self.SubtitleLabel.setText(_translate("SafetyInterface", "Apps"))
+        self.ButtonEtractAPKFile.setText(_translate("SafetyInterface", "Extract APK File"))
+        self.ButtonBackupData.setText(_translate("SafetyInterface", "Backup Data"))
+        self.ButtonRefresh.setText(_translate("SafetyInterface", "Refresh"))
+from qfluentwidgets import IndeterminateProgressBar, PrimaryPushButton, ProgressBar, ScrollArea, SubtitleLabel, TableWidget, TitleLabel
 import assets_rc

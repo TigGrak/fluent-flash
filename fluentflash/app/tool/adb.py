@@ -6,6 +6,7 @@
 import subprocess
 from ..common.config import cfg
 from ..common.runtime import rt
+from ..common.signal_bus import signalKey
 
 
 class Command:
@@ -37,7 +38,9 @@ class Command:
         self.cmd_device_baseband_version = ['-s',self.device,'shell','getprop','gsm.version.baseband']
         self.cmd_device_security_patch_date = ['-s',self.device,'shell','getprop','ro.build.version.security_patch']
         self.cmd_device_get_superuser = ['-s', self.device, 'shell', self.cmd_adb_su,'echo','"Success"']
-        self.cmd_get_global_device_name = ['-s',self.device,'shell','settings','get','global','device_name']
+        self.cmd_device_get_global_device_name = ['-s',self.device,'shell','settings','get','global','device_name']
+
+        self.cmd_device_get_package_list = ['-s',self.device,'shell','pm','list','packages','-f']
 
 
 
@@ -68,6 +71,8 @@ class ADBTool:
 
         # insert adb path
         run_cmd.insert(0,self.adb_path)
+
+        print(run_cmd)
 
         #run
         process = subprocess.Popen(run_cmd,
@@ -106,9 +111,9 @@ class ADBTool:
             devices_info['devices'][device] = self.run(['-s',device,'shell','settings','get','global','device_name'])[0].strip()
 
         if len(devices_info['devices']) == 0:
-            devices_info['status'] = 'NOT_FOUND'
+            devices_info['status'] = signalKey.NOT_FOUND
         else:
-            devices_info['status'] = 'FOUND'
+            devices_info['status'] = signalKey.FOUND
 
         return devices_info
 
@@ -125,7 +130,7 @@ class ADBTool:
         else:
             device_connect_type = 'USB'
         # get device brand
-        device_name,_ = self.run(self.command.cmd_get_global_device_name)
+        device_name,_ = self.run(self.command.cmd_device_get_global_device_name)
         device_name = device_name.strip()
         # get device model
         device_model,_ = self.run(self.command.cmd_device_model)
@@ -196,6 +201,30 @@ class ADBTool:
             return True
         else:
             return False
+
+    def getApps(self):
+        app_info = {'status':'','info':{},'error':''}
+        package_list_raw,error = self.run(self.command.cmd_device_get_package_list)
+        package_list_raw = package_list_raw.strip().split('\n')
+        error = error.strip()
+        if error:
+            app_info['status'] = signalKey.ERROR
+            app_info['error'] = error
+            return app_info
+
+        info = {}
+        #package:/aa==/bb==/cc==/xyz.apk=com.xx.xx
+        for i in package_list_raw:
+            # package_name:last one com.xx.xx
+            package_name = i.split('=')[-1]
+            # package_path: remove package: and =package_name
+            package_path = i.replace('package:','')
+            package_path = f"{package_path.replace(f'.apk={package_name}','')}.apk"
+            info[package_name] = package_path
+        app_info['status'] = signalKey.SUCCESS
+        app_info['info'] = info
+        return app_info
+
 
 
 # global adb

@@ -1,21 +1,22 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-from PyQt5.QtCore import pyqtSignal,QObject
 from functools import wraps
+from app.common.signal_bus import signalBus
 
 
 
 
 
 
-class Runtime(QObject):
-    RT_signal = pyqtSignal(dict)
+class Runtime():
     def __init__(self):
         super().__init__()
         self.ROOT = False
         self.DEVICE_ID = ''
         self.DEVICE_INFO = {}
+
+        self.page_dict = {}
 
     """Send a message to the UI saying "时代变啦" every time an attribute is modified."""
     def sendSignal(attr_name):
@@ -23,7 +24,7 @@ class Runtime(QObject):
             @wraps(func)
             def inner(self,*args,**kwargs):
                 if getattr(self,attr_name) != args[0]:
-                    self.RT_signal.emit({'name': attr_name,'value':args[0]})
+                    signalBus.runtime_change.emit({'name': attr_name,'value':args[0]})
                 return func(self,*args,**kwargs)
             return inner
         return wrapper
@@ -44,8 +45,8 @@ class Runtime(QObject):
     def setDeviceInfo(self, device_info: dict):
         self.DEVICE_INFO = device_info
 
-
-
+    def savePageDict(self,page_dict):
+        self.page_dict = page_dict
 
 
 
