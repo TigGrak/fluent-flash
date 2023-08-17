@@ -1,0 +1,516 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ConnectInterface</class>
+ <widget class="QWidget" name="ConnectInterface">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>900</width>
+    <height>800</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <widget class="QWidget" name="gridLayoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>250</y>
+     <width>869</width>
+     <height>251</height>
+    </rect>
+   </property>
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <widget class="CardWidget" name="InfoCard1">
+      <widget class="IconWidget" name="IconWidget">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>40</y>
+         <width>41</width>
+         <height>41</height>
+        </rect>
+       </property>
+       <property name="icon">
+        <iconset resource="../assets/assets.qrc">
+         <normaloff>:/img/ico/device-mobile.svg</normaloff>:/img/ico/device-mobile.svg</iconset>
+       </property>
+      </widget>
+      <widget class="BodyLabel" name="InfoTitle1">
+       <property name="geometry">
+        <rect>
+         <x>60</x>
+         <y>10</y>
+         <width>221</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">font-size:16pt</string>
+       </property>
+       <property name="text">
+        <string>Device parameters</string>
+       </property>
+      </widget>
+      <widget class="BodyLabel" name="InfoText1">
+       <property name="geometry">
+        <rect>
+         <x>60</x>
+         <y>40</y>
+         <width>221</width>
+         <height>71</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color:#747474</string>
+       </property>
+       <property name="text">
+        <string>NO DATA</string>
+       </property>
+      </widget>
+     </widget>
+    </item>
+    <item row="1" column="2">
+     <widget class="CardWidget" name="InfoCard6">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <widget class="IconWidget" name="IconWidget_6">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>40</y>
+         <width>41</width>
+         <height>41</height>
+        </rect>
+       </property>
+       <property name="icon">
+        <iconset resource="../assets/assets.qrc">
+         <normaloff>:/img/ico/info.svg</normaloff>:/img/ico/info.svg</iconset>
+       </property>
+      </widget>
+      <widget class="BodyLabel" name="InfoTitle6">
+       <property name="geometry">
+        <rect>
+         <x>60</x>
+         <y>10</y>
+         <width>221</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">font-size:16pt</string>
+       </property>
+       <property name="text">
+        <string>Other information</string>
+       </property>
+      </widget>
+      <widget class="BodyLabel" name="InfoText1_6">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="geometry">
+        <rect>
+         <x>60</x>
+         <y>40</y>
+         <width>221</width>
+         <height>71</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color:#747474;</string>
+       </property>
+       <property name="text">
+        <string>NO DATA</string>
+       </property>
+      </widget>
+     </widget>
+    </item>
+    <item row="1" column="1">
+     <widget class="CardWidget" name="InfoCard5">
+      <widget class="IconWidget" name="IconWidget_5">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>40</y>
+         <width>41</width>
+         <height>41</height>
+        </rect>
+       </property>
+       <property name="icon">
+        <iconset resource="../assets/assets.qrc">
+         <normaloff>:/img/ico/shield.svg</normaloff>:/img/ico/shield.svg</iconset>
+       </property>
+      </widget>
+      <widget class="BodyLabel" name="InfoTitle5">
+       <property name="geometry">
+        <rect>
+         <x>60</x>
+         <y>10</y>
+         <width>221</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">font-size:16pt</string>
+       </property>
+       <property name="text">
+        <string>Security update</string>
+       </property>
+      </widget>
+      <widget class="BodyLabel" name="InfoText1_5">
+       <property name="geometry">
+        <rect>
+         <x>60</x>
+         <y>40</y>
+         <width>211</width>
+         <height>71</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color:#747474;</string>
+       </property>
+       <property name="text">
+        <string>NO DATA</string>
+       </property>
+      </widget>
+     </widget>
+    </item>
+    <item row="0" column="2">
+     <widget class="CardWidget" name="InfoCard3">
+      <widget class="IconWidget" name="IconWidget_3">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>40</y>
+         <width>41</width>
+         <height>41</height>
+        </rect>
+       </property>
+       <property name="icon">
+        <iconset resource="../assets/assets.qrc">
+         <normaloff>:/img/ico/kernel.svg</normaloff>:/img/ico/kernel.svg</iconset>
+       </property>
+      </widget>
+      <widget class="BodyLabel" name="InfoTitle3">
+       <property name="geometry">
+        <rect>
+         <x>60</x>
+         <y>10</y>
+         <width>221</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">font-size:16pt</string>
+       </property>
+       <property name="text">
+        <string>Kernel version</string>
+       </property>
+      </widget>
+      <widget class="BodyLabel" name="InfoText1_3">
+       <property name="geometry">
+        <rect>
+         <x>60</x>
+         <y>40</y>
+         <width>211</width>
+         <height>71</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color:#747474;</string>
+       </property>
+       <property name="text">
+        <string>NO DATA</string>
+       </property>
+      </widget>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="CardWidget" name="InfoCard2">
+      <widget class="IconWidget" name="IconWidget_2">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>40</y>
+         <width>41</width>
+         <height>41</height>
+        </rect>
+       </property>
+       <property name="icon">
+        <iconset resource="../assets/assets.qrc">
+         <normaloff>:/img/ico/android.svg</normaloff>:/img/ico/android.svg</iconset>
+       </property>
+      </widget>
+      <widget class="BodyLabel" name="InfoTitle2">
+       <property name="geometry">
+        <rect>
+         <x>60</x>
+         <y>10</y>
+         <width>221</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true"> font-size:16pt</string>
+       </property>
+       <property name="text">
+        <string>System version</string>
+       </property>
+      </widget>
+      <widget class="BodyLabel" name="InfoText1_2">
+       <property name="geometry">
+        <rect>
+         <x>60</x>
+         <y>40</y>
+         <width>221</width>
+         <height>71</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color:#747474;</string>
+       </property>
+       <property name="text">
+        <string>NO DATA</string>
+       </property>
+      </widget>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="CardWidget" name="InfoCard4">
+      <widget class="IconWidget" name="IconWidget_4">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>40</y>
+         <width>41</width>
+         <height>41</height>
+        </rect>
+       </property>
+       <property name="icon">
+        <iconset resource="../assets/assets.qrc">
+         <normaloff>:/img/ico/baseband.svg</normaloff>:/img/ico/baseband.svg</iconset>
+       </property>
+      </widget>
+      <widget class="BodyLabel" name="InfoTitle4">
+       <property name="geometry">
+        <rect>
+         <x>60</x>
+         <y>10</y>
+         <width>221</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">font-size:16pt</string>
+       </property>
+       <property name="text">
+        <string>Baseband version</string>
+       </property>
+      </widget>
+      <widget class="BodyLabel" name="InfoText1_4">
+       <property name="geometry">
+        <rect>
+         <x>60</x>
+         <y>40</y>
+         <width>211</width>
+         <height>71</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color:#747474;</string>
+       </property>
+       <property name="text">
+        <string>NO DATA</string>
+       </property>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="EditableComboBox" name="IPEditableComboBox">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>160</y>
+     <width>395</width>
+     <height>33</height>
+    </rect>
+   </property>
+   <property name="transparent" stdset="0">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="CheckBox" name="GetROOTPermissions">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>210</y>
+     <width>81</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>ROOT</string>
+   </property>
+  </widget>
+  <widget class="PrimaryToolButton" name="ConnectPrimaryToolButton">
+   <property name="geometry">
+    <rect>
+     <x>430</x>
+     <y>160</y>
+     <width>41</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="shortcut">
+    <string>Return</string>
+   </property>
+   <property name="autoRepeat">
+    <bool>false</bool>
+   </property>
+   <property name="popupMode">
+    <enum>QToolButton::DelayedPopup</enum>
+   </property>
+  </widget>
+  <widget class="TitleLabel" name="ConnectInterfaceTitle">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>60</y>
+     <width>123</width>
+     <height>38</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Connect</string>
+   </property>
+  </widget>
+  <widget class="BodyLabel" name="InfoTips">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>490</y>
+     <width>871</width>
+     <height>111</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">color:#747474;</string>
+   </property>
+   <property name="text">
+    <string>*This information is obtained using ADB and may not be accurate. There's a possibility of tampering.
+*RAM/storage might be smaller than the nominal value, especially storage, which only reads from the /sdcard directory, 
+  so it might be significantly smaller. This is considered a normal phenomenon.
+*ROOT mode carries certain risks. Please use it cautiously. The author is not responsible for any of your actions.</string>
+   </property>
+  </widget>
+  <widget class="BodyLabel" name="ConnectTips">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>130</y>
+     <width>871</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">color:#747474;</string>
+   </property>
+   <property name="text">
+    <string>Enter the IP address and port for wireless debugging. If using a data cable, simply click &quot;Connect.&quot;</string>
+   </property>
+  </widget>
+  <widget class="IndeterminateProgressBar" name="GetDeviceInfoIndeterminateProgressBar">
+   <property name="geometry">
+    <rect>
+     <x>22</x>
+     <y>197</y>
+     <width>391</width>
+     <height>4</height>
+    </rect>
+   </property>
+   <property name="minimum">
+    <number>0</number>
+   </property>
+   <property name="value">
+    <number>0</number>
+   </property>
+   <property name="shortPos" stdset="0">
+    <double>1.450000000000000</double>
+   </property>
+   <property name="longPos" stdset="0">
+    <double>1.213757325303310</double>
+   </property>
+  </widget>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>CheckBox</class>
+   <extends>QCheckBox</extends>
+   <header>qfluentwidgets</header>
+  </customwidget>
+  <customwidget>
+   <class>EditableComboBox</class>
+   <extends>LineEdit</extends>
+   <header>qfluentwidgets</header>
+  </customwidget>
+  <customwidget>
+   <class>ToolButton</class>
+   <extends>QToolButton</extends>
+   <header>qfluentwidgets</header>
+  </customwidget>
+  <customwidget>
+   <class>PrimaryToolButton</class>
+   <extends>ToolButton</extends>
+   <header>qfluentwidgets</header>
+  </customwidget>
+  <customwidget>
+   <class>IconWidget</class>
+   <extends>QWidget</extends>
+   <header>qfluentwidgets</header>
+  </customwidget>
+  <customwidget>
+   <class>CardWidget</class>
+   <extends>QFrame</extends>
+   <header>qfluentwidgets</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>BodyLabel</class>
+   <extends>QLabel</extends>
+   <header>qfluentwidgets</header>
+  </customwidget>
+  <customwidget>
+   <class>TitleLabel</class>
+   <extends>QLabel</extends>
+   <header>qfluentwidgets</header>
+  </customwidget>
+  <customwidget>
+   <class>IndeterminateProgressBar</class>
+   <extends>QProgressBar</extends>
+   <header>qfluentwidgets</header>
+  </customwidget>
+  <customwidget>
+   <class>LineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>qfluentwidgets</header>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="../assets/assets.qrc"/>
+ </resources>
+ <connections/>
+</ui>

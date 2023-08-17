@@ -1,0 +1,13 @@
+<RCC>
+  <qresource prefix="img">
+    <file>ico/android.svg</file>
+    <file>ico/baseband.svg</file>
+    <file>ico/device-mobile.svg</file>
+    <file>ico/info.svg</file>
+    <file>ico/kernel.svg</file>
+    <file>ico/shield.svg</file>
+  </qresource>
+  <qresource prefix="i18n">
+    <file>i18n/gallery.zh_CN.qm</file>
+  </qresource>
+</RCC>
