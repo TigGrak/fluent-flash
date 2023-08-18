@@ -21,4 +21,5 @@ class Translator(QObject):
         self.getting_root_success = self.tr('Superuser permissions obtained successfully. Please use with caution.')
 
         self.safety_app_package_name = self.tr('Package Name')
+        self.safety_app_name = self.tr('APK Name')
         self.safety_app_apk_path = self.tr('APK Path')

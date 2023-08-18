@@ -1,1 +1,14 @@
-{}
+{
+    "all": {
+        "ADBPath": "./app/bin/adb.exe",
+        "aaptPath": "./app/bin/device/aapt",
+        "ifLog": true
+    },
+    "MainWindow": {
+        "Language": "Auto"
+    },
+    "QFluentWidgets": {
+        "ThemeColor": "#ffffb7c5",
+        "ThemeMode": "Dark"
+    }
+}

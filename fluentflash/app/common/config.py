@@ -36,14 +36,23 @@ class Config(QConfig):
     appDisplayName = "FluentFlash"
     appAuthor = "TigGrak"
 
-    ADBPath = ConfigItem('all','ADBPath','./app/bin/adb.exe')
+    cachePath = '/data/local/tmp/fluent_flash'
 
-    ADBPATH = './app/bin/adb.exe'
+    ADBPath = ConfigItem('all', 'ADBPath', './app/bin/adb.exe')
+    aaptPath = ConfigItem('all', 'aaptPath', './app/bin/device/aapt')
+    ifLog = ConfigItem('all', 'ifLog', True)
+
     language = OptionsConfigItem(
         "MainWindow", "Language", Language.AUTO, OptionsValidator(Language), LanguageSerializer(), restart=True)
 
 
-
-
 cfg = Config()
-qconfig.load('app/config/config.json',cfg)
+qconfig.load('app/config/config.json', cfg)
+cfg.save()
+#print(cfg.language.value.value.name())
+"""
+
+cfg.set(cfg.aaptPath, './app/bin/device/aapt')
+print(cfg.aaptPath)
+"""
+

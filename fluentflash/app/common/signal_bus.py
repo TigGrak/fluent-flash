@@ -7,6 +7,8 @@ class SignalBus(QObject):
     switch_page = pyqtSignal(object)
     runtime_change = pyqtSignal(dict)
     refresh_device = pyqtSignal()
+    check_device = pyqtSignal()
+    refresh_device_app_list = pyqtSignal(dict)
 
 class SignalKey():
     """ Signal key """
@@ -15,6 +17,9 @@ class SignalKey():
     ERROR = 'ERROR'
     NOT_FOUND = 'NOT_FOUND'
     FOUND = 'FOUND'
+    ON = 'ON'
+    OFF = 'OFF'
+    SET_PROGRESS = 'SET_PROGRESS'
 
 signalBus = SignalBus()
 signalKey = SignalKey()

@@ -2,10 +2,16 @@
 /PyQt-Fluent-Widgets-master
 
 # 忽略idea
-.idea
+/.idea
 
 # 忽略pycache
-__pycache__
+/__pycache__
 
 # 忽略log
 /fluentflash/adbLog.log
+
+#忽略 test
+/test
+
+#忽略备份
+/fluentflash/app/bin/backup
