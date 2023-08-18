@@ -10,6 +10,10 @@
 # 忽略log
 /fluentflash/adbLog.log
 
+*/__pycache__
+
+
+
 #忽略 test
 /test
 
