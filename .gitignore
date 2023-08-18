@@ -10,7 +10,7 @@
 # 忽略log
 /fluentflash/adbLog.log
 
-*/__pycache__
+__pycache__/
 
 
 
