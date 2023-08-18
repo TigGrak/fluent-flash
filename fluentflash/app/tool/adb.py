@@ -84,24 +84,23 @@ class ADBTool:
         """Get adb log and save to file."""
         @wraps(func)
         def inner(self,*args, **kwargs):
-            if self.if_log:
-                with open(self.log_path, 'a+', encoding="UTF-8") as f:
-                    cmd = ''.join(f"{i} " for i in args[0])
-
-                    stdout, error = func(self,*args, **kwargs)
-                    stdout = stdout.strip()
-                    error = error.strip()
-                    f.write(f"###{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}###\n")
-                    f.write(f"cmd>>>{cmd}\n")
-                    if stdout:
-                        f.write(f"stdout>>>{stdout}\n")
-                    if error:
-                        f.write(f"error>>>{error}\n")
-                    f.write("################\n\n")
-                return stdout, error
-
-            else:
+            if not self.if_log:
                 return func(self,*args, **kwargs)
+            with open(self.log_path, 'a+', encoding="UTF-8") as f:
+                cmd = ''.join(f"{i} " for i in args[0])
+
+                stdout, error = func(self,*args, **kwargs)
+                stdout = stdout.strip()
+                error = error.strip()
+                f.write(f"###{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}###\n")
+                f.write(f"cmd>>>{cmd}\n")
+                if stdout:
+                    f.write(f"stdout>>>{stdout}\n")
+                if error:
+                    f.write(f"error>>>{error}\n")
+                f.write("################\n\n")
+            return stdout, error
+
         return inner
 
 
@@ -152,11 +151,11 @@ class ADBTool:
         #remove first line
         devices_list_raw.pop(0)
 
-        devices_list = []
-        for device in devices_list_raw:
-            if device and device.split('\t')[1] == 'device':
-                devices_list.append(device.split('\t')[0])
-
+        devices_list = [
+            device.split('\t')[0]
+            for device in devices_list_raw
+            if device and device.split('\t')[1] == 'device'
+        ]
         devices_info = {'devices': {}}
         for device in devices_list:
             devices_info['devices'][device] = self.beforeRun(['-s',device,'shell','settings','get','global','device_name'])[0].strip()
@@ -175,12 +174,7 @@ class ADBTool:
 
         self.command.setDeviceID(rt.DEVICE_ID)
         # if device_id is ip format
-        if rt.DEVICE_ID.find(':') != -1:
-            device_connect_type = 'TCP'
-        else:
-            device_connect_type = 'USB'
-
-
+        device_connect_type = 'TCP' if rt.DEVICE_ID.find(':') != -1 else 'USB'
         # get device name
         device_name,_ = self.beforeRun(self.command.cmd_device_get_global_device_name)
         device_name = device_name.strip()
@@ -249,17 +243,13 @@ class ADBTool:
 
         stdout,_ = self.beforeRun(self.command.cmd_device_get_superuser)
         stdout =  stdout.strip()
-        if stdout.find('Success') != -1:
-            return True
-        else:
-            return False
+        return stdout.find('Success') != -1
 
     def getApps(self):
         app_info = {'status':'','info':{},'error':''}
         package_list_raw,error = self.beforeRun(self.command.cmd_device_get_package_list)
         package_list_raw = package_list_raw.strip().split('\n')
-        error = error.strip()
-        if error:
+        if error := error.strip():
             app_info['status'] = signalKey.ERROR
             app_info['error'] = error
             return app_info

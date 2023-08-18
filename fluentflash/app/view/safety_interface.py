@@ -51,9 +51,9 @@ class SafetyInterface(MyDialog, Ui_SafetyInterface):
 
     def __connectSignal(self):
         # connect
-        self.ButtonRefresh.clicked.connect(self.startT_refreshAPPList)
-        self.get_app_list_thread.GA_signal.connect(self.callback_refreshAPPList)
-        self.AppList.itemSelectionChanged.connect(self.appItemSelectionChanged)
+        self.ButtonRefresh.clicked.connect(lambda:self.startT_refreshAPPList())
+        self.get_app_list_thread.GA_signal.connect(lambda app_list_dict:self.callback_refreshAPPList(app_list_dict))
+        self.AppList.itemSelectionChanged.connect(lambda:self.appItemSelectionChanged)
 
     def __setAPKButtonEnable(self,state):
         self.ButtonEtractAPKFile.setEnabled(state)
@@ -73,12 +73,12 @@ class SafetyInterface(MyDialog, Ui_SafetyInterface):
     def appItemSelectionChanged(self):
         """app item selection changed,get selected app info"""
         select = self.AppList.selectedItems()
-        select_app = {}
         select_length = len(select)/2
-        for i in range(int(select_length)):
-            select_app[select[i*2].text()] = select[i*2+1].text()
-
-        self.__setAPKButtonEnable(True if select_app else False)
+        select_app = {
+            select[i * 2].text(): select[i * 2 + 1].text()
+            for i in range(int(select_length))
+        }
+        self.__setAPKButtonEnable(bool(select_app))
 
         #print(select_app)
 

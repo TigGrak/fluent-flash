@@ -9,7 +9,7 @@ from PyQt5.QtCore import pyqtSignal,QThread
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QWidget,QGraphicsDropShadowEffect
 from app.view.Ui_ConnectInterface import Ui_ConnectInterface
-from qfluentwidgets import FluentIcon,MessageBox,StateToolTip
+from qfluentwidgets import FluentIcon,StateToolTip
 from app.tool.adb import adb
 from app.common.translator import Translator
 from app.common.runtime import rt
@@ -58,11 +58,11 @@ class ConnectInterface(MyDialog, Ui_ConnectInterface):
 
     def __connectSignal(self):
         # connect GetROOTPermissions checkbox
-        self.GetROOTPermissions.clicked.connect(self.ifGetROOTPermissionsChecked)
+        self.GetROOTPermissions.clicked.connect(lambda:self.ifGetROOTPermissionsChecked())
         # connect find device button
-        self.ConnectPrimaryToolButton.clicked.connect(self.startT_findDevice)
+        self.ConnectPrimaryToolButton.clicked.connect(lambda:self.startT_findDevice())
         # connect refresh device signal
-        signalBus.refresh_device.connect(self.callback_refreshDevice)
+        signalBus.refresh_device.connect(lambda:self.callback_refreshDevice())
 
 
     def setShadowEffect(self, card: QWidget):
@@ -85,12 +85,11 @@ class ConnectInterface(MyDialog, Ui_ConnectInterface):
                     self.t.getting_root_success)
             self.get_ROOT_state_tool_tip.setState(True)
             self.get_ROOT_state_tool_tip = None
-        else:
-            if not disable:
-                self.get_ROOT_state_tool_tip = StateToolTip(
-                self.t.getting_root_title, self.t.getting_root_content, self.window())
-                self.get_ROOT_state_tool_tip.move(self.get_ROOT_state_tool_tip.getSuitablePos())
-                self.get_ROOT_state_tool_tip.show()
+        elif not disable:
+            self.get_ROOT_state_tool_tip = StateToolTip(
+            self.t.getting_root_title, self.t.getting_root_content, self.window())
+            self.get_ROOT_state_tool_tip.move(self.get_ROOT_state_tool_tip.getSuitablePos())
+            self.get_ROOT_state_tool_tip.show()
 
     def ifGetROOTPermissionsChecked(self):
         """connected by GetROOTPermissions checkbox, if checked, start getting root"""
@@ -129,23 +128,26 @@ class ConnectInterface(MyDialog, Ui_ConnectInterface):
 
         if device_dict.get('status') == signalKey.FOUND:
 
-            #TODO
-            device_id = list(device_dict['devices'].keys())[0]
-            rt.setDeviceId(device_id)
-            # if device_id is a ip ,add to IPEditableComboBox
-            if device_id.find(':') != -1:
-                if self.IPEditableComboBox.findText(device_id) == -1:
-                    self.IPEditableComboBox.addItem(device_id)
-
-            self.get_device_info_thread = GetDeviceInfoThread()
-            self.get_device_info_thread.GDI_signal.connect(self.callback_getDeviceInfo)
-            self.get_device_info_thread.start()
-            #device_info = adb.getDeviceInfo(device_id)
+            self.startT_getDeviceInfo(device_dict)
+                #device_info = adb.getDeviceInfo(device_id)
         elif device_dict.get('status') == signalKey.NOT_FOUND:
             self.GetDeviceInfoIndeterminateProgressBar.hide()
             self.GetROOTPermissions.hide()
             self.ConnectPrimaryToolButton.setEnabled(True)
             self.showMessageDialog(self.t.error_title, self.t.error_device_not_found)
+
+    def startT_getDeviceInfo(self, device_dict):
+        #TODO
+        device_id = list(device_dict['devices'].keys())[0]
+        rt.setDeviceId(device_id)
+        # if device_id is a ip ,add to IPEditableComboBox
+        if device_id.find(':') != -1:
+            if self.IPEditableComboBox.findText(device_id) == -1:
+                self.IPEditableComboBox.addItem(device_id)
+
+        self.get_device_info_thread = GetDeviceInfoThread()
+        self.get_device_info_thread.GDI_signal.connect(lambda device_info:self.callback_getDeviceInfo(device_info))
+        self.get_device_info_thread.start()
 
     def callback_getROOT(self, res:bool):
         """callback function,update get root ui"""
@@ -182,18 +184,19 @@ class ConnectInterface(MyDialog, Ui_ConnectInterface):
 
         host = None if host == '' else host
         self.check_device_thread = FindDeviceThread(host)
-        self.check_device_thread.FDT_signal.connect(self.callback_findDevice)
+        self.check_device_thread.FDT_signal.connect(lambda device_dict:self.callback_findDevice(device_dict))
 
         # start thread
         self.check_device_thread.start()
 
     def startT_gettingROOT(self):
         """start thread to get root"""
-        res = self.showMessageDialog(self.t.risk_warning, self.t.get_ROOT_permissions_tips)
-        if res:
+        if self.showMessageDialog(
+            self.t.risk_warning, self.t.get_ROOT_permissions_tips
+        ):
             self.onGetROOT()
             self.get_ROOT_thread = GettingROOTThread()
-            self.get_ROOT_thread.GRT_signal.connect(self.callback_getROOT)
+            self.get_ROOT_thread.GRT_signal.connect(lambda root_res:self.callback_getROOT(root_res))
             self.get_ROOT_thread.start()
         else:
             self.GetROOTPermissions.setChecked(False)

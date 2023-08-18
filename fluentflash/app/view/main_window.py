@@ -49,7 +49,7 @@ class MainWindow(SplitFluentWindow):
 
     def __connectSignal(self):
         """connect signal and"""
-        signalBus.switch_page.connect(self.__switchPage)
+        signalBus.switch_page.connect(lambda page:self.__switchPage(page))
 
     def __switchPage(self,page):
         self.switchTo(page)
