@@ -367,7 +367,6 @@ class ADBUse:
         return res
 
     def getApps(self):
-        # TODO
         app_info = {'status': '', 'info': {}, 'error': ''}
 
         package_list_raw, error = self.run(self.command.cmd_device_get_package_list)

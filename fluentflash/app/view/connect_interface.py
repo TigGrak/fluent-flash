@@ -5,7 +5,7 @@
 # TIGGRAK
 
 
-from PyQt5.QtCore import pyqtSignal, QThread
+from PyQt5.QtCore import pyqtSignal, QThread, QPropertyAnimation,QTimer
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QWidget, QGraphicsDropShadowEffect
 from app.view.Ui_ConnectInterface import Ui_ConnectInterface
@@ -64,6 +64,7 @@ class ConnectInterface(MyDialog, Ui_ConnectInterface):
         shadowEffect.setBlurRadius(10)
         shadowEffect.setOffset(0, 0)
         card.setGraphicsEffect(shadowEffect)
+
 
     def onGetROOT(self, disable=False):
         """set state tool tip when getting root"""

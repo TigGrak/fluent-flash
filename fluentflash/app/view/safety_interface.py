@@ -43,8 +43,7 @@ class SafetyInterface(Check, Ui_SafetyInterface):
         self.AppList.setEditTriggers(QAbstractItemView.NoEditTriggers)
 
         # hide progress
-        self.RefreshProgress.hide()
-        self.BackupAExtractProgress.hide()
+        self.__setProgressVisible(False)
 
         # disable button
         self.__setAPKButtonEnable(False)
@@ -63,11 +62,9 @@ class SafetyInterface(Check, Ui_SafetyInterface):
 
 
     def __setProgressVisible(self, state, reboot=True):
-        #self.RefreshProgress.setVisible(state)
+
         self.BackupAExtractProgress.setVisible(state)
         if reboot:
-            #.RefreshProgress.stop()
-            #self.RefreshProgress.start()
             self.BackupAExtractProgress.setValue(0)
 
     def appItemSelectionChanged(self):
