@@ -94,8 +94,7 @@ class ConnectInterface(MyDialog, Ui_ConnectInterface):
 
     def callback_getDeviceInfo(self, res):
         """callback function,update device info ui"""
-        self.GetDeviceInfoIndeterminateProgressBar.hide()
-        self.ConnectPrimaryToolButton.setEnabled(True)
+
 
         if res.get('status') != signalKey.SUCCESS:
             self.showMessageDialog(self.t.error_title, res.get('error'))
@@ -120,24 +119,36 @@ class ConnectInterface(MyDialog, Ui_ConnectInterface):
             f"{device_info['device_connect_type']}\n{device_info['device_id']}\n{device_info['adb_version']}\n{device_info['windows_version']}")
 
         self.GetROOTPermissions.show()
+        self.GetDeviceInfoIndeterminateProgressBar.hide()
+        self.ConnectPrimaryToolButton.setEnabled(True)
 
 
     def callback_findDevice(self, device_dict):
         """callback function,update find device ui"""
 
-        if device_dict.get('status') == signalKey.FOUND:
 
+
+        if device_dict.get('status') == signalKey.FOUND:
             self.startT_getDeviceInfo(device_dict)
+            return
             # device_info = adb.getDeviceInfo(device_id)
         elif device_dict.get('status') == signalKey.NOT_FOUND:
-            self.GetDeviceInfoIndeterminateProgressBar.hide()
-            self.GetROOTPermissions.hide()
-            self.ConnectPrimaryToolButton.setEnabled(True)
-            self.showMessageDialog(self.t.error_title, self.t.error_device_not_found)
+            self.showMessageDialog(self.t.error_title, self.t.error_device_adb_not_found)
+        elif device_dict.get('status') == signalKey.ERROR:
+            self.showMessageDialog(self.t.error_title, device_dict.get('error'))
+        self.GetDeviceInfoIndeterminateProgressBar.hide()
+        self.ConnectPrimaryToolButton.setEnabled(True)
+        rt.setDeviceId('')
+
+
+
+
+
+
 
     def startT_getDeviceInfo(self, device_dict):
         # TODO
-        device_id = list(device_dict['devices'].keys())[0]
+        device_id = list(device_dict['info'].keys())[0]
         rt.setDeviceId(device_id)
         # if device_id is a ip ,add to IPEditableComboBox
         if device_id.find(':') != -1 and self.IPEditableComboBox.findText(device_id) == -1:
@@ -163,6 +174,13 @@ class ConnectInterface(MyDialog, Ui_ConnectInterface):
     def callback_refreshDevice(self):
         rt.setRoot(False)
         # init ui
+        self.InfoText1.setText(self.t.NO_DATA)
+        self.InfoText1_2.setText(self.t.NO_DATA)
+        self.InfoText1_3.setText(self.t.NO_DATA)
+        self.InfoText1_4.setText(self.t.NO_DATA)
+        self.InfoText1_5.setText(self.t.NO_DATA)
+        self.InfoText1_6.setText(self.t.NO_DATA)
+
         self.ConnectPrimaryToolButton.setEnabled(False)
         self.GetROOTPermissions.setChecked(False)
         self.GetROOTPermissions.hide()

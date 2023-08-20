@@ -38,7 +38,7 @@ class Config(QConfig):
 
     cachePath = '/data/local/tmp/fluent_flash'
 
-    ADBPath = ConfigItem('all', 'ADBPath', './app/bin/adb.exe')
+    ADBPath = ConfigItem('all', 'ADBPath', './app/bin/adb')
     aaptPath = ConfigItem('all', 'aaptPath', './app/bin/device/aapt')
     ifLog = ConfigItem('all', 'ifLog', True)
 
@@ -48,7 +48,6 @@ class Config(QConfig):
 
 cfg = Config()
 qconfig.load('app/config/config.json', cfg)
-cfg.save()
 #print(cfg.language.value.value.name())
 """
 

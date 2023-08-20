@@ -8,7 +8,7 @@ from ..common.config import cfg
 from ..common.runtime import rt
 from ..common.signal_bus import signalKey, signalBus
 from functools import wraps
-import time, inspect
+import time, inspect,re
 
 
 class Command:
@@ -113,17 +113,20 @@ class ADBTool:
     @adbLog
     def run(self, command, input_=''):
         """Run a single-line command with the option to preset an input in advance."""
+        try:
+            # run
+            process = subprocess.Popen(command,
+                                       stdin=subprocess.PIPE,
+                                       stdout=subprocess.PIPE,
+                                       stderr=subprocess.PIPE,
+                                       text=True,
+                                       encoding='utf-8')
 
-        # run
-        process = subprocess.Popen(command,
-                                   stdin=subprocess.PIPE,
-                                   stdout=subprocess.PIPE,
-                                   stderr=subprocess.PIPE,
-                                   text=True,
-                                   encoding='utf-8')
+            # input input_ and return
+            return process.communicate(input_)
 
-        # input input_ and return
-        return process.communicate(input_)
+        except Exception as e:
+            return '', str(e)
 
 
 class ADBUse:
@@ -134,17 +137,33 @@ class ADBUse:
         self.adb_path = cfg.ADBPath.value
         self.check_group = {}
 
-    def run(self, command, input_=''):
-        run_cmd = list(command)
+    # command completion
+    def commandCompletion(self, cmd):
+        """Command completion"""
 
+        command = list(cmd)
         # check if need root
-        if rt.ROOT and len(run_cmd) > 3 and run_cmd[2] == 'shell':
-            run_cmd.insert(3, self.command.cmd_adb_su)
+        if rt.ROOT and len(command) > 3 and command[2] == 'shell':
+            command.insert(3, self.command.cmd_adb_su)
 
         # insert adb path
-        run_cmd.insert(0, self.adb_path)
+        command.insert(0, self.adb_path)
+        return command
 
-        print(run_cmd)
+    def checkError(self, stdout, error, cus_check=None):
+        """Check if there is an error in the command."""
+
+        if cus_check is None:
+            cus_check = ['adb: error:.*', '\[WinError 2\].*','adb\.exe: device .* not found','adb: error:.*']
+        #print(stdout,error)
+        return any(re.search(i, stdout) or re.search(i, error) for i in cus_check)
+
+    def run(self, command, input_=''):
+        """Run a single-line command with the option to preset an input in advance."""
+
+        run_cmd = self.commandCompletion(command)
+
+        #print(run_cmd)
         stdout, error = self.adb_tool.run(run_cmd, input_)
         if self.if_log and inspect.stack()[1].function in self.check_group:
             info = {'cmd': run_cmd, 'input': input_, 'stdout': stdout, 'error': error}
@@ -152,21 +171,27 @@ class ADBUse:
         return stdout, error
 
     def addCheckgroup(self):
+        """Start record cmd in the function."""
+
         if not self.if_log:
             return
-        # 获取第一个调用者
+        # get function name
         frame = inspect.stack()[1].function
         self.check_group[frame] = {'info': [], 'status': signalKey.ON}
 
     def stopCheckgroup(self):
+        """Stop record cmd in the function."""
+
         if (not self.if_log) or (inspect.stack()[1].function not in self.check_group):
             return
         self.check_group[inspect.stack()[1].function]['status'] = signalKey.OFF
 
     def checkGroup(self, cus_res=None):
+        """Check if there is an error in the command group."""
+
         res = {'status': '', 'info': {}, 'error': ''}
         if cus_res is not None:
-            cmd = cus_res['cmd']
+            cmd = self.commandCompletion(cus_res['cmd'])
             error = cus_res['error']
             stdout = cus_res['stdout']
             info = [{'cmd': cmd, 'input': '', 'stdout': stdout, 'error': error}]
@@ -176,17 +201,18 @@ class ADBUse:
             info = self.check_group[inspect.stack()[1].function]['info']
 
         for i in info:
-
             error = i['error'].strip()
             stdout = i['stdout'].strip()
-
-            if error.find('adb: error:') > -1 or stdout.find('adb: error:') > -1:
+            # adb error ; windows error
+            if self.checkError(stdout, error):
                 res['status'] = signalKey.ERROR
                 cmd = ''.join(f"{j} " for j in i['cmd'])
                 res['error'] += f"cmd>>>{cmd}\nout>>>{error or stdout}\n"
         return res
 
     def delCheckgroup(self):
+        """deleter function key in self.check_group"""
+
         if not self.if_log or inspect.stack()[1].function not in self.check_group:
             return
         self.check_group.pop(inspect.stack()[1].function, None)
@@ -202,7 +228,11 @@ class ADBUse:
             self.command.setHost(host)
             self.run(self.command.cmd_connect)
 
-        devices_list_raw, _ = self.run(self.command.cmd_adb_devices)
+        devices_list_raw, error = self.run(self.command.cmd_adb_devices)
+        res = self.checkGroup(cus_res={'cmd': self.command.cmd_adb_devices, 'stdout': devices_list_raw, 'error': error})
+        if res['status'] == signalKey.ERROR:
+            return res
+
         devices_list_raw = devices_list_raw.strip()
         devices_list_raw = devices_list_raw.split('\n')
         # remove first line
@@ -213,12 +243,12 @@ class ADBUse:
             for device in devices_list_raw
             if device and device.split('\t')[1] == 'device'
         ]
-        devices_info = {'devices': {}}
+        devices_info = {'info': {}}
         for device in devices_list:
-            devices_info['devices'][device] = \
+            devices_info['info'][device] = \
                 self.run(['-s', device, 'shell', 'settings', 'get', 'global', 'device_name'])[0].strip()
 
-        if len(devices_info['devices']) == 0:
+        if len(devices_info['info']) == 0:
             devices_info['status'] = signalKey.NOT_FOUND
         else:
             devices_info['status'] = signalKey.FOUND
@@ -339,6 +369,7 @@ class ADBUse:
     def getApps(self):
         # TODO
         app_info = {'status': '', 'info': {}, 'error': ''}
+
         package_list_raw, error = self.run(self.command.cmd_device_get_package_list)
 
         res = self.checkGroup(
@@ -363,6 +394,7 @@ class ADBUse:
             app, error = self.run(self.command.cmd_device_aapt + [package_path])
             res = self.checkGroup(
                 cus_res={'cmd': self.command.cmd_device_aapt + [package_path], 'stdout': app, 'error': error})
+            print(app, error)
             if res['status'] == signalKey.ERROR:
                 return res
             app = app.strip() or ''

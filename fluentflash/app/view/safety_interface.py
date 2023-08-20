@@ -118,6 +118,9 @@ class SafetyInterface(Check, Ui_SafetyInterface):
         self.AppList.setDisabled(False)
         self.__setProgressVisible(False)
         self.ButtonRefresh.setEnabled(True)
+        if self.apps_info.get('status') == signalKey.ERROR:
+            self.showMessageDialog(self.t.error_title, self.apps_info.get('error'))
+            return
 
     def addAppInfo(self, info):
         key = list(info.keys())[0]

@@ -19,3 +19,5 @@ __pycache__/
 
 #忽略备份
 /fluentflash/app/bin/backup
+
+/fluentflash/app/bin/magisk

@@ -12,7 +12,7 @@ class Translator(QObject):
         self.get_ROOT_permissions_tips = self.tr('After obtaining ROOT access, this software will have full control and operation over your device. This could lead to irreversible damage to your device, and the author will not be held responsible for any consequences arising from this. If you believe you are familiar with ROOT-related operations, you may proceed.')
         self.error_title = self.tr('Error')
         self.error_get_superuser_failed = self.tr('Failed to obtain superuser permissions, please check if the device is rooted and allows Shell (com.android.shell) to access superuser requests.')
-        self.error_device_not_found = self.tr('Device not found. Please check if the cable is connected correctly or if the IP address is entered correctly.')
+        self.error_device_adb_not_found = self.tr('Device not found. Please check if the data cable is connected correctly or if the IP address input is accurate. This could also be due to issues with the ADB program.')
         self.error_no_device = self.tr('No device available for operation. Please connect to a device first.')
 
         self.stop_operation_success = self.tr('Operation canceled or permission acquisition failed.')
@@ -23,3 +23,5 @@ class Translator(QObject):
         self.safety_app_package_name = self.tr('Package Name')
         self.safety_app_name = self.tr('APK Name')
         self.safety_app_apk_path = self.tr('APK Path')
+
+        self.NO_DATA = self.tr('NO DATA')
