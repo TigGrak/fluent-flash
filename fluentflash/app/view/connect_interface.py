@@ -96,10 +96,13 @@ class ConnectInterface(MyDialog, Ui_ConnectInterface):
     def callback_getDeviceInfo(self, res):
         """callback function,update device info ui"""
 
-
         if res.get('status') != signalKey.SUCCESS:
             self.showMessageDialog(self.t.error_title, res.get('error'))
             rt.setDeviceId('')
+            self.GetROOTPermissions.hide()
+            self.GetDeviceInfoIndeterminateProgressBar.hide()
+            self.ConnectPrimaryToolButton.setEnabled(True)
+
             return
 
         device_info = res.get('info')
@@ -148,7 +151,6 @@ class ConnectInterface(MyDialog, Ui_ConnectInterface):
 
 
     def startT_getDeviceInfo(self, device_dict):
-        # TODO
         device_id = list(device_dict['info'].keys())[0]
         rt.setDeviceId(device_id)
         # if device_id is a ip ,add to IPEditableComboBox
@@ -159,18 +161,21 @@ class ConnectInterface(MyDialog, Ui_ConnectInterface):
         self.get_device_info_thread.GDI_signal.connect(lambda res: self.callback_getDeviceInfo(res))
         self.get_device_info_thread.start()
 
-    def callback_getROOT(self, res: bool):
+    def callback_getROOT(self, res: dict):
         """callback function,update get root ui"""
-        if res:
-            self.onGetROOT()
-            rt.setRoot(True)
-        else:
+        if res.get('status') == signalKey.ERROR:
+            self.showMessageDialog(self.t.error_title, res.get('error'))
+
+        if not res.get('info'):
             self.onGetROOT(disable=True)
             rt.setRoot(False)
             # if checkbox is checked
-            if self.GetROOTPermissions.isChecked():
-                self.GetROOTPermissions.setChecked(False)
-                self.showMessageDialog(self.t.error_title, self.t.error_get_superuser_failed)
+            self.GetROOTPermissions.setChecked(False)
+            self.showMessageDialog(self.t.error_title, self.t.error_get_superuser_failed)
+
+        else:
+            self.onGetROOT()
+            rt.setRoot(True)
 
     def callback_refreshDevice(self):
         rt.setRoot(False)
@@ -253,7 +258,7 @@ class GetDeviceInfoThread(QThread):
 
 
 class GettingROOTThread(QThread):
-    GRT_signal = pyqtSignal(bool)
+    GRT_signal = pyqtSignal(dict)
 
     def __init__(self):
         super().__init__()

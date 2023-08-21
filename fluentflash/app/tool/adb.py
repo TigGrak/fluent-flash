@@ -8,7 +8,7 @@ from ..common.config import cfg
 from ..common.runtime import rt
 from ..common.signal_bus import signalKey, signalBus
 from functools import wraps
-import time, inspect,re
+import time, inspect, re
 
 
 class Command:
@@ -135,7 +135,6 @@ class ADBUse:
         self.if_log = cfg.ifLog.value
         self.adb_tool = ADBTool(cfg.ADBPath.value, if_log=self.if_log)
         self.adb_path = cfg.ADBPath.value
-        self.check_group = {}
 
     # command completion
     def commandCompletion(self, cmd):
@@ -154,69 +153,38 @@ class ADBUse:
         """Check if there is an error in the command."""
 
         if cus_check is None:
-            cus_check = ['adb: error:.*', '\[WinError 2\].*','adb\.exe: device .* not found','adb: error:.*']
-        #print(stdout,error)
-        return any(re.search(i, stdout) or re.search(i, error) for i in cus_check)
+            cus_check = ['adb: error:.*', '\[WinError 2\].*', 'adb\.exe: device .* not found', 'adb: error:.*']
+
+        for i in cus_check:
+            if re.search(i, stdout):
+                return stdout.strip()
+            if re.search(i, error):
+                return error.strip()
+        return None
+
+    def tryFunc(func):
+        """Try to run the function and return the result."""
+        @wraps(func)
+        def inner(self, *args, **kwargs):
+            try:
+                return func(self, *args, **kwargs)
+            except Exception as e:
+                return {'status': signalKey.ERROR, 'info': {}, 'error': str(e)}
+
+        return inner
 
     def run(self, command, input_=''):
         """Run a single-line command with the option to preset an input in advance."""
 
         run_cmd = self.commandCompletion(command)
-
-        #print(run_cmd)
+        # print(run_cmd)
         stdout, error = self.adb_tool.run(run_cmd, input_)
-        if self.if_log and inspect.stack()[1].function in self.check_group:
-            info = {'cmd': run_cmd, 'input': input_, 'stdout': stdout, 'error': error}
-            self.check_group[inspect.stack()[1].function]['info'].append(info)
+        if (error := self.checkError(stdout, error)) is not None:
+            error_cmd = ''.join(f"{i} " for i in run_cmd)
+            raise Exception(f"cmd>>>{error_cmd}\nout>>>{error}\n")
         return stdout, error
 
-    def addCheckgroup(self):
-        """Start record cmd in the function."""
-
-        if not self.if_log:
-            return
-        # get function name
-        frame = inspect.stack()[1].function
-        self.check_group[frame] = {'info': [], 'status': signalKey.ON}
-
-    def stopCheckgroup(self):
-        """Stop record cmd in the function."""
-
-        if (not self.if_log) or (inspect.stack()[1].function not in self.check_group):
-            return
-        self.check_group[inspect.stack()[1].function]['status'] = signalKey.OFF
-
-    def checkGroup(self, cus_res=None):
-        """Check if there is an error in the command group."""
-
-        res = {'status': '', 'info': {}, 'error': ''}
-        if cus_res is not None:
-            cmd = self.commandCompletion(cus_res['cmd'])
-            error = cus_res['error']
-            stdout = cus_res['stdout']
-            info = [{'cmd': cmd, 'input': '', 'stdout': stdout, 'error': error}]
-        elif (not self.if_log) and (inspect.stack()[1].function not in self.check_group):
-            return
-        else:
-            info = self.check_group[inspect.stack()[1].function]['info']
-
-        for i in info:
-            error = i['error'].strip()
-            stdout = i['stdout'].strip()
-            # adb error ; windows error
-            if self.checkError(stdout, error):
-                res['status'] = signalKey.ERROR
-                cmd = ''.join(f"{j} " for j in i['cmd'])
-                res['error'] += f"cmd>>>{cmd}\nout>>>{error or stdout}\n"
-        return res
-
-    def delCheckgroup(self):
-        """deleter function key in self.check_group"""
-
-        if not self.if_log or inspect.stack()[1].function not in self.check_group:
-            return
-        self.check_group.pop(inspect.stack()[1].function, None)
-
+    @tryFunc
     def checkDevice(self, host=None):
         """Check if the device is connected and return the device ID and name."""
 
@@ -229,9 +197,6 @@ class ADBUse:
             self.run(self.command.cmd_connect)
 
         devices_list_raw, error = self.run(self.command.cmd_adb_devices)
-        res = self.checkGroup(cus_res={'cmd': self.command.cmd_adb_devices, 'stdout': devices_list_raw, 'error': error})
-        if res['status'] == signalKey.ERROR:
-            return res
 
         devices_list_raw = devices_list_raw.strip()
         devices_list_raw = devices_list_raw.split('\n')
@@ -255,10 +220,10 @@ class ADBUse:
 
         return devices_info
 
+    @tryFunc
     def getDeviceInfo(self):
         """Get device information and return a dictionary."""
 
-        self.addCheckgroup()
         self.command.setDeviceID(rt.DEVICE_ID)
         # if device_id is ip format
         device_connect_type = 'TCP' if rt.DEVICE_ID.find(':') != -1 else 'USB'
@@ -320,9 +285,6 @@ class ADBUse:
             adb_version = ''
             windows_version = ''
 
-        self.stopCheckgroup()
-        res = self.checkGroup()
-        self.delCheckgroup()
         info = {'device_id': rt.DEVICE_ID,
                 'device_connect_type': device_connect_type,
                 'device_name': device_name,
@@ -339,42 +301,33 @@ class ADBUse:
                 'device_storage': device_storage,
                 'device_memory': device_memory}
 
-        if res['status'] != signalKey.ERROR:
-            res['status'] = signalKey.SUCCESS
-            res['info'] = info
-        print(res)
+        return {'status': signalKey.SUCCESS, 'info': info, 'error': ''}
 
-        return res
-
+    @tryFunc
     def checkSU(self):
         """Check if the device has root permission."""
 
         stdout, _ = self.run(self.command.cmd_device_get_superuser)
         stdout = stdout.strip()
-        return stdout.find('Success') != -1
+        return {'status': signalKey.SUCCESS, 'info': stdout.find('Success') != -1, 'error': ''}
 
+    @tryFunc
     def push(self, local_path, remote_path):
-
-        self.addCheckgroup()
+        """Push a file to the device."""
 
         stdout, error = self.run(self.command.cmd_device_push + [local_path, remote_path])
         _, _ = self.run(self.command.cmd_device_chmod + [remote_path])
-        self.stopCheckgroup()
-        res = self.checkGroup()
-        if res['status'] != signalKey.ERROR:
-            res['status'] = signalKey.SUCCESS
-            res['info'] = {'stdout': stdout, 'error': error}
-        return res
+        return {
+            'status': signalKey.SUCCESS,
+            'info': {'stdout': stdout, 'error': error},
+            'error': ''
+        }
 
+    @tryFunc
     def getApps(self):
-        app_info = {'status': '', 'info': {}, 'error': ''}
+        """Get all apps on the device and return a dictionary."""
 
         package_list_raw, error = self.run(self.command.cmd_device_get_package_list)
-
-        res = self.checkGroup(
-            cus_res={'cmd': self.command.cmd_device_get_package_list, 'stdout': package_list_raw, 'error': error})
-        if res['status'] == signalKey.ERROR:
-            return res
 
         package_list_raw = package_list_raw.strip().split('\n')
         per_progress = 100 / len(package_list_raw)
@@ -391,11 +344,6 @@ class ADBUse:
             info[package_name] = {}
 
             app, error = self.run(self.command.cmd_device_aapt + [package_path])
-            res = self.checkGroup(
-                cus_res={'cmd': self.command.cmd_device_aapt + [package_path], 'stdout': app, 'error': error})
-            print(app, error)
-            if res['status'] == signalKey.ERROR:
-                return res
             app = app.strip() or ''
             app_name = {}
             sdkVersion = ''
@@ -448,9 +396,7 @@ class ADBUse:
                 package_name: {'path': package_path, 'name': app_name, 'version': version, 'sdkVersion': sdkVersion,
                                'native_code': native_code}}})
 
-        app_info['status'] = signalKey.SUCCESS
-        app_info['info'] = info
-        return app_info
+        return {'error': '', 'status': signalKey.SUCCESS, 'info': info}
 
 
 # global adb
