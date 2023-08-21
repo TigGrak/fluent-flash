@@ -2,6 +2,7 @@
 # -*- coding:utf-8 -*-
 from PyQt5.QtCore import QObject, pyqtSignal
 
+
 class SignalBus(QObject):
     """ Signal bus """
     switch_page = pyqtSignal(object)
@@ -9,6 +10,8 @@ class SignalBus(QObject):
     refresh_device = pyqtSignal()
     check_device = pyqtSignal()
     refresh_device_app_list = pyqtSignal(dict)
+    stop_exec_cmd = pyqtSignal()
+
 
 class SignalKey():
     """ Signal key """
@@ -20,6 +23,7 @@ class SignalKey():
     ON = 'ON'
     OFF = 'OFF'
     SET_PROGRESS = 'SET_PROGRESS'
+
 
 signalBus = SignalBus()
 signalKey = SignalKey()

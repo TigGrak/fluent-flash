@@ -4,12 +4,15 @@
 
 
 import subprocess
-from ..common.config import cfg
-from ..common.runtime import rt
-from ..common.signal_bus import signalKey, signalBus
-from functools import wraps
 import time
 import re
+import signal
+from ..common.config import cfg
+from ..common.runtime import rt
+from ..common.translator import Translator
+from ..common.signal_bus import signalKey, signalBus
+from functools import wraps
+
 
 
 class Command:
@@ -79,7 +82,7 @@ class Command:
 
 class ADBTool:
     def __init__(self, adb_path, log_path="./adbLog.log", if_log=True):
-
+        self.t = Translator()
         self.command = Command()
         self.adb_path = adb_path
         self.log_path = log_path
@@ -114,20 +117,28 @@ class ADBTool:
     @adbLog
     def run(self, command, input_=''):
         """Run a single-line command with the option to preset an input in advance."""
-        try:
-            # run
-            process = subprocess.Popen(command,
-                                       stdin=subprocess.PIPE,
-                                       stdout=subprocess.PIPE,
-                                       stderr=subprocess.PIPE,
-                                       text=True,
-                                       encoding='utf-8')
+        # run
+        process = subprocess.Popen(command,
+                                   stdin=subprocess.PIPE,
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE,
+                                   text=True,
+                                   encoding='utf-8',
+                                   creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
 
+        rt.setRunCmdProcess(process)
+
+        try:
+            if not rt.run_cmd_process_status:
+                raise Exception(f'error: {self.t.stop_operation_success}')
             # input input_ and return
             return process.communicate(input_)
 
         except Exception as e:
             return '', str(e)
+        finally:
+            process.terminate()
+            process.wait()
 
 
 class ADBUse:
@@ -154,7 +165,7 @@ class ADBUse:
         """Check if there is an error in the command."""
 
         if cus_check is None:
-            cus_check = ['adb: error:.*', '\[WinError 2\].*', 'adb\.exe: device .* not found', 'adb: error:.*']
+            cus_check = ['adb: error:.*', '\[WinError 2\].*', 'adb\.exe: device .* not found', 'error:.*']
 
         for i in cus_check:
             if re.search(i, stdout):
@@ -169,9 +180,13 @@ class ADBUse:
         @wraps(func)
         def inner(self, *args, **kwargs):
             try:
+                rt.setRunCmdProcessStatus(True)
                 return func(self, *args, **kwargs)
             except Exception as e:
                 return {'status': signalKey.ERROR, 'info': {}, 'error': str(e)}
+            finally:
+                rt.setRunCmdProcess(None)
+
 
         return inner
 

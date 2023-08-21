@@ -24,6 +24,7 @@ class MainWindow(SplitFluentWindow):
         self.__connectSignal()
 
     def __initSubPage(self):
+        """init sub page"""
         # creat sub page
         self.connectInterface = ConnectInterface(self)
         self.safetyInterface = SafetyInterface(self)
@@ -31,8 +32,8 @@ class MainWindow(SplitFluentWindow):
         rt.savePageDict(page_dict)
 
     def __initWindow(self):
+        """init window"""
         # set new title bar
-
         self.my_title_bar = NoMaxMinButtonTitleBar(self)
         self.setTitleBar(self.my_title_bar)
         self.my_title_bar.setTitle(cfg.appDisplayName)
@@ -59,13 +60,29 @@ class MainWindow(SplitFluentWindow):
             tooltip=self.t.navigation_button_stop_command
         )
 
+        self.navigationInterface.widget('stop_exec_cmd').setEnabled(False)
+
     def __connectSignal(self):
         """connect signal and"""
         signalBus.switch_page.connect(lambda page: self.__switchPage(page))
+        signalBus.runtime_change.connect(lambda runtime: self.callback_runtimeChange(runtime))
 
     def __switchPage(self, page):
         """switch page"""
         self.switchTo(page)
+
+    def callback_runtimeChange(self, runtime):
+        """callback runtime change"""
+
+        name = runtime.get('name')
+        value = runtime.get('value')
+        if name == 'run_cmd_process':
+            if value is None:
+                # disable stop command button
+                self.navigationInterface.widget('stop_exec_cmd').setEnabled(False)
+            else:
+                # enable stop command button
+                self.navigationInterface.widget('stop_exec_cmd').setEnabled(True)
 
     def stopCommand(self):
         """stop command"""
@@ -75,8 +92,7 @@ class MainWindow(SplitFluentWindow):
             self
         )
         if w.exec():
-            pass
-        #TODO
+            signalBus.stop_exec_cmd.emit()
 
 
 class NoMaxMinButtonTitleBar(SplitTitleBar):
