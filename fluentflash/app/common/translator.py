@@ -7,6 +7,10 @@ class Translator(QObject):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
         self.connect_interface_title = self.tr('Connect')
+        self.safety_interface_title = self.tr('Safety')
+
+        self.navigation_button_stop_command = self.tr('Stop execution cmd')
+        self.stop_command_warning = self.tr('Are you sure you want to forcefully stop the running command? This could potentially lead to software malfunctions or device damage.')
 
         self.risk_warning = self.tr('Risk Warning')
         self.get_ROOT_permissions_tips = self.tr('After obtaining ROOT access, this software will have full control and operation over your device. This could lead to irreversible damage to your device, and the author will not be held responsible for any consequences arising from this. If you believe you are familiar with ROOT-related operations, you may proceed.')
