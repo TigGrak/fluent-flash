@@ -8,7 +8,8 @@ from ..common.config import cfg
 from ..common.runtime import rt
 from ..common.signal_bus import signalKey, signalBus
 from functools import wraps
-import time, inspect, re
+import time
+import re
 
 
 class Command:
@@ -164,6 +165,7 @@ class ADBUse:
 
     def tryFunc(func):
         """Try to run the function and return the result."""
+
         @wraps(func)
         def inner(self, *args, **kwargs):
             try:
