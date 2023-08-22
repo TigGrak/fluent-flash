@@ -137,9 +137,9 @@
     <widget class="CaptionLabel" name="APPNameLabel">
      <property name="geometry">
       <rect>
-       <x>610</x>
+       <x>590</x>
        <y>200</y>
-       <width>271</width>
+       <width>301</width>
        <height>21</height>
       </rect>
      </property>
@@ -166,9 +166,9 @@
     <widget class="CaptionLabel" name="APPPackageNameLabel">
      <property name="geometry">
       <rect>
-       <x>620</x>
+       <x>590</x>
        <y>300</y>
-       <width>261</width>
+       <width>301</width>
        <height>21</height>
       </rect>
      </property>
@@ -182,7 +182,7 @@
       <set>Qt::AlignCenter</set>
      </property>
     </widget>
-    <widget class="PrimaryPushButton" name="ButtonUninstall_2">
+    <widget class="PrimaryPushButton" name="ButtonUninstall">
      <property name="geometry">
       <rect>
        <x>690</x>
@@ -252,7 +252,7 @@
       <rect>
        <x>665</x>
        <y>162</y>
-       <width>65</width>
+       <width>75</width>
        <height>15</height>
       </rect>
      </property>

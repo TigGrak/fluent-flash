@@ -14,7 +14,6 @@ from ..common.signal_bus import signalKey, signalBus
 from functools import wraps
 
 
-
 class Command:
     def __init__(self):
         # device id
@@ -52,7 +51,9 @@ class Command:
         self.cmd_device_get_superuser = ['-s', self.device, 'shell', self.cmd_adb_su, 'echo', '"Success"']
         self.cmd_device_get_global_device_name = ['-s', self.device, 'shell', 'settings', 'get', 'global',
                                                   'device_name']
-        self.cmd_device_get_package_list = ['-s', self.device, 'shell', 'pm', 'list', 'packages', '-f']
+        self.cmd_device_get_package_list = ['-s', self.device, 'shell', 'pm', 'list', 'packages', '-f -d']
+        self.cmd_device_get_system_app = ['-s', self.device, 'shell', 'pm', 'list', 'packages', '-s']
+        self.cmd_device_get_disable_app = ['-s', self.device, 'shell', 'pm', 'list', 'packages', '-d']
 
         self.cmd_device_push = ['-s', self.device, 'push']
         self.cmd_device_chmod = ['-s', self.device, 'shell', 'chmod', '770']
@@ -186,7 +187,6 @@ class ADBUse:
                 return {'status': signalKey.ERROR, 'info': {}, 'error': str(e)}
             finally:
                 rt.setRunCmdProcess(None)
-
 
         return inner
 
@@ -345,35 +345,48 @@ class ADBUse:
         """Get all apps on the device and return a dictionary."""
 
         package_list_raw, error = self.run(self.command.cmd_device_get_package_list)
-
         package_list_raw = package_list_raw.strip().split('\n')
         per_progress = 100 / len(package_list_raw)
         signalBus.refresh_device_app_list.emit({'status': signalKey.SET_PROGRESS, 'info': per_progress, 'error': ''})
 
+        disable_app_list_raw, error = self.run(self.command.cmd_device_get_disable_app)
+        disable_app_list_raw = disable_app_list_raw.strip().split('\n')
+        disable_app_list = [i.split(':')[-1] for i in disable_app_list_raw]
+
+        system_app_list_raw, error = self.run(self.command.cmd_device_get_system_app)
+        system_app_list_raw = system_app_list_raw.strip().split('\n')
+        system_app_list = [i.split(':')[-1] for i in system_app_list_raw]
+
+        print(disable_app_list)
+        print(system_app_list)
+
         # {'com.xx.xx':{'path':'/data/app/com.xx.xx.apk','name':{},'version':'','sdkVersion':'','native-code':''}}
         info = {}
-        for i in package_list_raw:
+        for package in package_list_raw:
             # package_name:last one com.xx.xx
-            package_name = i.split('=')[-1]
+            package_name = package.split('=')[-1]
             # package_path: remove package: and =package_name
-            package_path = i.replace('package:', '')
+            package_path = package.replace('package:', '')
             package_path = f"{package_path.replace(f'.apk={package_name}', '')}.apk"
             info[package_name] = {}
 
             app, error = self.run(self.command.cmd_device_aapt + [package_path])
             app = app.strip() or ''
+
             app_name = {}
             sdkVersion = ''
             version = ''
             native_code = ''
+            app_type = ''
+            app_enable = True
 
             for line in app.splitlines():
                 # get version
                 if line.startswith('package:'):
                     line = line.split(' ')
-                    for i in line:
-                        if i.startswith('versionName'):
-                            version = i.split('=')[1].replace("'", '')
+                    for ver in line:
+                        if ver.startswith('versionName'):
+                            version = ver.split('=')[1].replace("'", '')
 
                 # get android sdk version
                 elif line.startswith('sdkVersion:'):
@@ -399,6 +412,8 @@ class ADBUse:
                     native_code = line[1].replace("'", '')
                     native_code = native_code.strip()
 
+            info[package_name]['enable'] = False if package_name in disable_app_list else True
+            info[package_name]['type'] = 'SYSTEM APP' if package_name in system_app_list else 'USER APP'
             info[package_name]['path'] = package_path
             info[package_name]['name'] = app_name
             info[package_name]['version'] = version

@@ -42,6 +42,14 @@ class SafetyInterface(Check, Ui_SafetyInterface):
         self.AppList.setColumnWidth(1, 390)
         self.AppList.setEditTriggers(QAbstractItemView.NoEditTriggers)
 
+        # app info bar
+        self.ButtonUninstall.setEnabled(False)
+        self.ButtonDisable.setEnabled(False)
+        self.ButtonEnable.setEnabled(False)
+        self.SelectQuantity.setText(str(0))
+        self.InfoBadge.setText(self.t.safety_app_type)
+
+
         # hide progress
         self.__setProgressVisible(False)
 
@@ -75,9 +83,43 @@ class SafetyInterface(Check, Ui_SafetyInterface):
             select[i * 2].text(): select[i * 2 + 1].text()
             for i in range(int(select_length))
         }
+        print(self.apps_info)
         self.__setAPKButtonEnable(bool(select_app))
+        self.SelectQuantity.setText(str(int(select_length)))
+        if select_length > 0:
+            first_app_name = list(select_app.keys())[0]
+            first_app_package_name = list(select_app.values())[0]
+            first_app_enable = self.apps_info[first_app_package_name]['enable']
+            first_app_type = self.apps_info[first_app_package_name]['type']
 
-        # print(select_app)
+            more_text = '...' if select_length > 1 else ''
+            self.InfoBadge.setText('...' if select_length > 1 else first_app_type)
+            self.APPNameLabel.setText(first_app_name + more_text)
+            self.APPPackageNameLabel.setText(first_app_package_name + more_text)
+
+            if select_length == 1:
+                self.ButtonUninstall.setEnabled(True)
+                self.ButtonEnable.setEnabled(not first_app_enable)
+                self.ButtonDisable.setEnabled(first_app_enable)
+            else:
+                self.ButtonUninstall.setEnabled(False)
+                self.ButtonEnable.setEnabled(False)
+                self.ButtonDisable.setEnabled(False)
+        else:
+            self.InfoBadge.setText(self.t.safety_app_type)
+            self.APPNameLabel.setText(self.t.NO_DATA)
+            self.APPPackageNameLabel.setText(self.t.NO_DATA)
+            self.ButtonUninstall.setEnabled(False)
+            self.ButtonDisable.setEnabled(False)
+            self.ButtonEnable.setEnabled(False)
+
+
+
+
+
+
+
+        print(select_app)
 
     @Check.checkRunCmd(check_device=True)
     def startT_refreshAPPList(self):
@@ -110,11 +152,12 @@ class SafetyInterface(Check, Ui_SafetyInterface):
 
     def callback_addAppListFinished(self, app_info):
         """finish add app list"""
-        self.apps_info = app_info
+        self.apps_info = app_info.get('info')
         self.AppList.setDisabled(False)
         self.__setProgressVisible(False)
         self.ButtonRefresh.setEnabled(True)
-        if self.apps_info.get('status') == signalKey.ERROR:
+        if app_info.get('status') == signalKey.ERROR:
+            print(111)
             # clear App List
             self.AppList.setRowCount(0)
             self.apps_info = {}

@@ -43,3 +43,5 @@ class Translator(QObject):
         self.safety_app_apk_path = self.tr('APK Path')
 
         self.NO_DATA = self.tr('NO DATA')
+
+        self.safety_app_type = self.tr('APP TYPE')
