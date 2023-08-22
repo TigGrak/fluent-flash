@@ -15,6 +15,7 @@ from app.common.translator import Translator
 from app.common.runtime import rt
 from app.lib.myDialog import MyDialog
 from app.common.signal_bus import signalKey, signalBus
+from app.common.public import Check
 
 
 # MyDialog is a QWidget's subclass,according to mro,QWidget can omit
@@ -29,7 +30,6 @@ class ConnectInterface(MyDialog, Ui_ConnectInterface):
         self.get_device_info_thread = None
         self.check_device_thread = None
         self.get_ROOT_thread = None
-
         self.get_ROOT_state_tool_tip = None
 
         self.__initUI()
@@ -84,8 +84,17 @@ class ConnectInterface(MyDialog, Ui_ConnectInterface):
             self.get_ROOT_state_tool_tip.move(self.get_ROOT_state_tool_tip.getSuitablePos())
             self.get_ROOT_state_tool_tip.show()
 
+    def checkBoxDisable(self):
+        """disable checkbox"""
+        self.GetROOTPermissions.setEnabled(False)
+
+
     def ifGetROOTPermissionsChecked(self):
         """connected by GetROOTPermissions checkbox, if checked, start getting root"""
+        if not Check.checkRunCmd_bool(self,check_device=False):
+            self.GetROOTPermissions.setChecked(not self.GetROOTPermissions.isChecked())
+            return
+
         if self.GetROOTPermissions.isChecked():
             self.startT_gettingROOT()
 
@@ -194,6 +203,7 @@ class ConnectInterface(MyDialog, Ui_ConnectInterface):
         self.GetDeviceInfoIndeterminateProgressBar.stop()
         self.GetDeviceInfoIndeterminateProgressBar.start()
 
+    @Check.checkRunCmd(check_device=False)
     def startT_findDevice(self):
         """start thread to find device"""
 

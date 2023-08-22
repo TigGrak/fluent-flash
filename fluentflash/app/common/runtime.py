@@ -16,6 +16,7 @@ class Runtime():
         self.run_cmd_process = None
         self.run_cmd_process_status = True
 
+
         self.__connectSiganl()
 
     def __connectSiganl(self):

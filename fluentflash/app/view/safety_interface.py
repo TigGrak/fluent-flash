@@ -79,6 +79,7 @@ class SafetyInterface(Check, Ui_SafetyInterface):
 
         # print(select_app)
 
+    @Check.checkRunCmd(check_device=True)
     def startT_refreshAPPList(self):
         """ start thread to refresh app list """
         # disable app list selection
@@ -89,8 +90,6 @@ class SafetyInterface(Check, Ui_SafetyInterface):
         self.AppList.setRowCount(0)
 
 
-        if not self.checkDevice():
-            return
 
         self.__setAPKButtonEnable(False)
         self.__setProgressVisible(True)

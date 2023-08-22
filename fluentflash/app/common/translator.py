@@ -13,7 +13,9 @@ class Translator(QObject):
         self.stop_command_warning = self.tr(
             'Are you sure you want to forcefully stop the running command? This could potentially lead to software '
             'malfunctions or device damage.')
+        self.no_command_running = self.tr('No command is currently running.')
         self.stop_command_success = self.tr('The command has been terminated.')
+        self.command_running = self.tr('An operation is currently running. Multiple operations cannot be executed simultaneously.')
 
         self.risk_warning = self.tr('Risk Warning')
         self.get_ROOT_permissions_tips = self.tr(
