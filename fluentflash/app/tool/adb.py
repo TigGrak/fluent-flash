@@ -51,11 +51,12 @@ class Command:
         self.cmd_device_get_superuser = ['-s', self.device, 'shell', self.cmd_adb_su, 'echo', '"Success"']
         self.cmd_device_get_global_device_name = ['-s', self.device, 'shell', 'settings', 'get', 'global',
                                                   'device_name']
-        self.cmd_device_get_package_list = ['-s', self.device, 'shell', 'pm', 'list', 'packages', '-f -d']
+        self.cmd_device_get_package_list = ['-s', self.device, 'shell', 'pm', 'list', 'packages', '-f']
         self.cmd_device_get_system_app = ['-s', self.device, 'shell', 'pm', 'list', 'packages', '-s']
         self.cmd_device_get_disable_app = ['-s', self.device, 'shell', 'pm', 'list', 'packages', '-d']
 
         self.cmd_device_push = ['-s', self.device, 'push']
+        self.cmd_device_pull = ['-s', self.device, 'pull']
         self.cmd_device_chmod = ['-s', self.device, 'shell', 'chmod', '770']
 
         self.cmd_device_aapt = ['-s', self.device, 'shell', f'{cfg.cachePath}/aapt', 'dump', 'badging']
@@ -340,6 +341,37 @@ class ADBUse:
             'error': ''
         }
 
+    def pull(self, rp, lp):
+        """Pull a file from the device."""
+
+        self.run(self.command.cmd_device_pull + [rp, lp])
+        return {
+            'status': signalKey.SUCCESS,
+            'info': '',
+            'error': ''
+        }
+
+    @tryFunc
+    def extractAPKFile(self, file_list):
+        """Extract apk file from device."""
+        task_count = len(file_list)
+        per_progress = 100 / task_count
+        signalBus.extract_apk.emit(
+            {'status': signalKey.SUCCESS, 'info': {'type': signalKey.SET_PROGRESS, 'progress': 0}, 'error': ''})
+        for file in file_list:
+            rp = file[1]
+            lp = file[0]
+            self.pull(rp, lp)
+            per_progress += 100 / task_count
+            signalBus.extract_apk.emit(
+                {'status': signalKey.SET_PROGRESS, 'info': {'type': signalKey.SET_PROGRESS, 'progress': per_progress},
+                 'error': ''})
+        return {
+            'status': signalKey.SUCCESS,
+            'info': {'type': signalKey.SUCCESS, 'info': ''},
+            'error': ''
+        }
+
     @tryFunc
     def getApps(self):
         """Get all apps on the device and return a dictionary."""
@@ -377,8 +409,6 @@ class ADBUse:
             sdkVersion = ''
             version = ''
             native_code = ''
-            app_type = ''
-            app_enable = True
 
             for line in app.splitlines():
                 # get version
@@ -412,7 +442,7 @@ class ADBUse:
                     native_code = line[1].replace("'", '')
                     native_code = native_code.strip()
 
-            info[package_name]['enable'] = False if package_name in disable_app_list else True
+            info[package_name]['enable'] = package_name not in disable_app_list
             info[package_name]['type'] = 'SYSTEM APP' if package_name in system_app_list else 'USER APP'
             info[package_name]['path'] = package_path
             info[package_name]['name'] = app_name

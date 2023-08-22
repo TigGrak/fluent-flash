@@ -11,6 +11,7 @@ class SignalBus(QObject):
     check_device = pyqtSignal()
     refresh_device_app_list = pyqtSignal(dict)
     stop_exec_cmd = pyqtSignal()
+    extract_apk = pyqtSignal(dict)
 
 
 class SignalKey():
