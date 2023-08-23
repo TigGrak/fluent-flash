@@ -156,7 +156,7 @@ class SafetyInterface(Check, Ui_SafetyInterface):
     def startT_extractAPKFile(self):
         """start thread to extract apk file"""
         path = QFileDialog.getExistingDirectory(
-            self, self.t.choose_dir, "./")
+            self, self.t.choose_dir, "../test/app")
         if not path:
             return
 
@@ -181,6 +181,8 @@ class SafetyInterface(Check, Ui_SafetyInterface):
             self.showMessageDialog(self.t.error_title, res.get('error'))
 
         self.AppList.setDisabled(False)
+        self.ButtonRefresh.setEnabled(True)
+        self.__setProgressVisible(False)
         self.appItemSelectionChanged()
 
 
@@ -232,7 +234,7 @@ class ExtractAPKFile(QThread):
         self.path_list = path_list
 
     def run(self):
-        signalBus.extract_apk.emit(adb.pull(self.path_list))
+        signalBus.extract_apk.emit(adb.extractAPKFile(self.path_list))
         return
 
 
