@@ -24,6 +24,7 @@ class SafetyInterface(Check, Ui_SafetyInterface):
         # predefine
         self.apps_info = {}
         self.explore_apk_file_thread = None
+        self.uninstall_app_thread = None
         self.select_app_info = {}
 
         self.get_app_list_thread = GetApps()
@@ -64,13 +65,12 @@ class SafetyInterface(Check, Ui_SafetyInterface):
         self.AppList.itemSelectionChanged.connect(lambda: self.appItemSelectionChanged())
         self.get_app_list_thread.GA_signal.connect(lambda app_info: self.callback_addAppListFinished(app_info))
         self.ButtonEtractAPKFile.clicked.connect(lambda: self.startT_extractAPKFile())
-        self.ButtonBackupData.clicked.connect(lambda: self.startT_backupData())
+        self.ButtonUninstall.clicked.connect(lambda: self.startT_uninstallAPP())
         signalBus.refresh_device_app_list.connect(lambda app_info: self.callback_addAppList(app_info))
         signalBus.extract_apk.connect(lambda res: self.callback_extractAPKFile(res))
 
     def __setAPKButtonEnable(self, state):
         self.ButtonEtractAPKFile.setEnabled(state)
-        self.ButtonBackupData.setEnabled(state)
 
     def __setProgressVisible(self, state, reboot=True):
 
@@ -95,9 +95,7 @@ class SafetyInterface(Check, Ui_SafetyInterface):
             for package_name in select_app
         }
 
-
-
-        #print(self.apps_info)
+        # print(self.apps_info)
         self.__setAPKButtonEnable(bool(select_app))
         self.SelectQuantity.setText(str(int(select_length)))
         if select_length > 0:
@@ -145,7 +143,6 @@ class SafetyInterface(Check, Ui_SafetyInterface):
     def setAllEnable(self, state):
         self.ButtonRefresh.setEnabled(state)
         self.ButtonEtractAPKFile.setEnabled(state)
-        self.ButtonBackupData.setEnabled(state)
         self.ButtonUninstall.setEnabled(state)
         self.ButtonDisable.setEnabled(state)
         self.ButtonEnable.setEnabled(state)
@@ -154,14 +151,20 @@ class SafetyInterface(Check, Ui_SafetyInterface):
         self.AppList.setDisabled(not state)
 
     @Check.checkRunCmd(check_device=True)
-    def startT_backupData(self):
-        """start thread to backup data"""
-        path = QFileDialog.getExistingDirectory(
-            self, self.t.choose_dir, "../test/app")
-        if not path:
+    def startT_uninstallAPP(self):
+        w = MessageBox(self.t.risk_warning, self.t.safety_uninstall_app_warn, self.window())
+        if not w.exec():
             return
-
-
+        # get select app
+        package_name = list(self.select_app_info.keys())[0]
+        app_type = self.apps_info[package_name]['type']
+        if app_type == 'SYSTEM APP':
+            x = MessageBox(self.t.risk_warning, self.t.safety_uninstall_system_app_warn, self.window())
+            if not x.exec():
+                return
+        self.uninstall_app_thread = UninstallAPP(package_name)
+        self.uninstall_app_thread.UA_signal.connect(lambda res: self.callback_uninstallAPP(res))
+        self.uninstall_app_thread.run()
 
     @Check.checkRunCmd(check_device=True)
     def startT_extractAPKFile(self):
@@ -180,6 +183,21 @@ class SafetyInterface(Check, Ui_SafetyInterface):
         self.explore_apk_file_thread = ExtractAPKFile(file_list)
         self.explore_apk_file_thread.start()
 
+    def callback_uninstallAPP(self, res):
+        status = res.get('status')
+        error = res.get('error')
+        info = res.get('info')
+        print(error, info)
+        if status == signalKey.SUCCESS:
+            MessageBox(self.t.notification_title, self.t.safety_uninstall_success, self.window()).exec()
+            # remove app from app list
+            self.AppList.removeRow(self.AppList.currentRow())
+            # clear selection
+            self.AppList.clearSelection()
+
+        else:
+            MessageBox(self.t.error_title, error, self.window()).exec()
+
     def callback_extractAPKFile(self, res):
         """callback function,update extract apk file ui"""
         status = res.get('status')
@@ -195,7 +213,6 @@ class SafetyInterface(Check, Ui_SafetyInterface):
         self.ButtonRefresh.setEnabled(True)
         self.__setProgressVisible(False)
         self.appItemSelectionChanged()
-
 
     def callback_addAppList(self, app_info):
         # {'status':'','info':{},'error':''}
@@ -237,13 +254,25 @@ class SafetyInterface(Check, Ui_SafetyInterface):
 
 class ExtractAPKFile(QThread):
 
-
     def __init__(self, path_list, parent=None):
         super().__init__(parent)
         self.path_list = path_list
 
     def run(self):
         signalBus.extract_apk.emit(adb.extractAPKFile(self.path_list))
+        return
+
+
+class UninstallAPP(QThread):
+    UA_signal = pyqtSignal(dict)
+
+    def __init__(self, package_name):
+        super().__init__()
+        self.package_name = package_name
+
+    def run(self):
+        res = adb.uninstallAPP(self.package_name)
+        self.UA_signal.emit(res)
         return
 
 

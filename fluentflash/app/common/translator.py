@@ -15,15 +15,19 @@ class Translator(QObject):
             'malfunctions or device damage.')
         self.no_command_running = self.tr('No command is currently running.')
         self.stop_command_success = self.tr('The command has been terminated.')
-        self.command_running = self.tr('An operation is currently running. Multiple operations cannot be executed simultaneously.')
+        self.command_running = self.tr(
+            'An operation is currently running. Multiple operations cannot be executed simultaneously.')
 
         self.risk_warning = self.tr('Risk Warning')
+        self.error_title = self.tr('Error')
+        self.notification_title = self.tr('Notification')
+
         self.get_ROOT_permissions_tips = self.tr(
             'After obtaining ROOT access, this software will have full control and operation over your device. This '
             'could lead to irreversible damage to your device, and the author will not be held responsible for any '
             'consequences arising from this. If you believe you are familiar with ROOT-related operations, '
             'you may proceed.')
-        self.error_title = self.tr('Error')
+
         self.error_get_superuser_failed = self.tr(
             'Failed to obtain superuser permissions, please check if the device is rooted and allows Shell ('
             'com.android.shell) to access superuser requests.')
@@ -42,8 +46,11 @@ class Translator(QObject):
         self.safety_app_name = self.tr('APK Name')
         self.safety_app_apk_path = self.tr('APK Path')
         self.safety_app_type = self.tr('APP TYPE')
+        self.safety_uninstall_app_warn = self.tr('Are you sure you want to uninstall this app?')
+        self.safety_uninstall_system_app_warn = self.tr(
+            'This seems to be a system app. Uninstalling it could potentially cause system damage. Do you still want '
+            'to uninstall it?')
+        self.safety_uninstall_success = self.tr('Uninstall Successful')
         self.NO_DATA = self.tr('NO DATA')
 
         self.choose_dir = self.tr('Choose a directory')
-
-

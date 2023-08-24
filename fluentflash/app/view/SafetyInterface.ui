@@ -95,19 +95,6 @@
       <string>Extract APK File</string>
      </property>
     </widget>
-    <widget class="PrimaryPushButton" name="ButtonBackupData">
-     <property name="geometry">
-      <rect>
-       <x>460</x>
-       <y>580</y>
-       <width>131</width>
-       <height>32</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Backup Data</string>
-     </property>
-    </widget>
     <widget class="PrimaryPushButton" name="ButtonRefresh">
      <property name="geometry">
       <rect>

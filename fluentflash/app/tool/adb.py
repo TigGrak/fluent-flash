@@ -51,12 +51,13 @@ class Command:
         self.cmd_device_get_superuser = ['-s', self.device, 'shell', self.cmd_adb_su, 'echo', '"Success"']
         self.cmd_device_get_global_device_name = ['-s', self.device, 'shell', 'settings', 'get', 'global',
                                                   'device_name']
-        self.cmd_device_get_package_list = ['-s', self.device, 'shell', 'pm', 'list', 'packages', '-f']
+        self.cmd_device_get_package_list = ['-s', self.device, 'shell', 'pm', 'list', 'packages', '-f -d']
         self.cmd_device_get_system_app = ['-s', self.device, 'shell', 'pm', 'list', 'packages', '-s']
         self.cmd_device_get_disable_app = ['-s', self.device, 'shell', 'pm', 'list', 'packages', '-d']
 
         self.cmd_device_push = ['-s', self.device, 'push']
         self.cmd_device_pull = ['-s', self.device, 'pull']
+        self.cmd_device_uninstall_app = ['-s', self.device, 'shell', 'pm', 'uninstall', '--user 0']
         self.cmd_device_chmod = ['-s', self.device, 'shell', 'chmod', '770']
 
         self.cmd_device_aapt = ['-s', self.device, 'shell', f'{cfg.cachePath}/aapt', 'dump', 'badging']
@@ -167,7 +168,8 @@ class ADBUse:
         """Check if there is an error in the command."""
 
         if cus_check is None:
-            cus_check = ['adb: error:.*', '\[WinError 2\].*', 'adb\.exe: device .* not found', 'error:.*']
+            cus_check = ['adb: error:.*', '\[WinError 2\].*', 'adb\.exe: device .* not found', 'error:.*',
+                         'Failure \[.*\]']
 
         for i in cus_check:
             if re.search(i, stdout):
@@ -370,6 +372,16 @@ class ADBUse:
             'status': signalKey.SUCCESS,
             'info': {'type': signalKey.SUCCESS, 'info': ''},
             'error': ''
+        }
+
+    @tryFunc
+    def uninstallAPP(self, package_name):
+        package = [package_name]
+        stdout, error = self.run(self.command.cmd_device_uninstall_app + package)
+        return {
+            'status': signalKey.SUCCESS,
+            'info': stdout,
+            'error': error
         }
 
     @tryFunc
