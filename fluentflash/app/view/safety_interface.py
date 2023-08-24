@@ -64,6 +64,7 @@ class SafetyInterface(Check, Ui_SafetyInterface):
         self.AppList.itemSelectionChanged.connect(lambda: self.appItemSelectionChanged())
         self.get_app_list_thread.GA_signal.connect(lambda app_info: self.callback_addAppListFinished(app_info))
         self.ButtonEtractAPKFile.clicked.connect(lambda: self.startT_extractAPKFile())
+        self.ButtonBackupData.clicked.connect(lambda: self.startT_backupData())
         signalBus.refresh_device_app_list.connect(lambda app_info: self.callback_addAppList(app_info))
         signalBus.extract_apk.connect(lambda res: self.callback_extractAPKFile(res))
 
@@ -153,6 +154,16 @@ class SafetyInterface(Check, Ui_SafetyInterface):
         self.AppList.setDisabled(not state)
 
     @Check.checkRunCmd(check_device=True)
+    def startT_backupData(self):
+        """start thread to backup data"""
+        path = QFileDialog.getExistingDirectory(
+            self, self.t.choose_dir, "../test/app")
+        if not path:
+            return
+
+
+
+    @Check.checkRunCmd(check_device=True)
     def startT_extractAPKFile(self):
         """start thread to extract apk file"""
         path = QFileDialog.getExistingDirectory(
@@ -184,8 +195,6 @@ class SafetyInterface(Check, Ui_SafetyInterface):
         self.ButtonRefresh.setEnabled(True)
         self.__setProgressVisible(False)
         self.appItemSelectionChanged()
-
-
 
 
     def callback_addAppList(self, app_info):
