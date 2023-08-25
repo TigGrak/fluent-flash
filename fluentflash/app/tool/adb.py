@@ -51,13 +51,15 @@ class Command:
         self.cmd_device_get_superuser = ['-s', self.device, 'shell', self.cmd_adb_su, 'echo', '"Success"']
         self.cmd_device_get_global_device_name = ['-s', self.device, 'shell', 'settings', 'get', 'global',
                                                   'device_name']
-        self.cmd_device_get_package_list = ['-s', self.device, 'shell', 'pm', 'list', 'packages', '-f -d']
+        self.cmd_device_get_package_list = ['-s', self.device, 'shell', 'pm', 'list', 'packages', '-f']
         self.cmd_device_get_system_app = ['-s', self.device, 'shell', 'pm', 'list', 'packages', '-s']
         self.cmd_device_get_disable_app = ['-s', self.device, 'shell', 'pm', 'list', 'packages', '-d']
 
         self.cmd_device_push = ['-s', self.device, 'push']
         self.cmd_device_pull = ['-s', self.device, 'pull']
         self.cmd_device_uninstall_app = ['-s', self.device, 'shell', 'pm', 'uninstall', '--user 0']
+        self.cmd_device_enable_app = ['-s', self.device, 'shell', 'pm', 'enable']
+        self.cmd_device_disable_app = ['-s', self.device, 'shell', 'pm', 'disable']
         self.cmd_device_chmod = ['-s', self.device, 'shell', 'chmod', '770']
 
         self.cmd_device_aapt = ['-s', self.device, 'shell', f'{cfg.cachePath}/aapt', 'dump', 'badging']
@@ -381,6 +383,19 @@ class ADBUse:
         return {
             'status': signalKey.SUCCESS,
             'info': stdout,
+            'error': error
+        }
+
+    @tryFunc
+    def setAPPEnable(self, package_name, enable):
+        package = [package_name]
+        stdout, error = (
+            self.run(self.command.cmd_device_enable_app + package)) \
+            if enable else (
+            self.run(self.command.cmd_device_disable_app + package))
+        return {
+            'status': signalKey.SUCCESS,
+            'info': {'stdout': stdout, 'type':enable},
             'error': error
         }
 

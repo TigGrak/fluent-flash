@@ -25,10 +25,10 @@ class SafetyInterface(Check, Ui_SafetyInterface):
         self.apps_info = {}
         self.explore_apk_file_thread = None
         self.uninstall_app_thread = None
+        self.set_app_enable_thread = None
         self.select_app_info = {}
 
         self.get_app_list_thread = GetApps()
-
         self.__initUI()
         self.__connectSignal()
 
@@ -66,6 +66,8 @@ class SafetyInterface(Check, Ui_SafetyInterface):
         self.get_app_list_thread.GA_signal.connect(lambda app_info: self.callback_addAppListFinished(app_info))
         self.ButtonEtractAPKFile.clicked.connect(lambda: self.startT_extractAPKFile())
         self.ButtonUninstall.clicked.connect(lambda: self.startT_uninstallAPP())
+        self.ButtonEnable.clicked.connect(lambda: self.startT_setAPPEnable(True))
+        self.ButtonDisable.clicked.connect(lambda: self.startT_setAPPEnable(False))
         signalBus.refresh_device_app_list.connect(lambda app_info: self.callback_addAppList(app_info))
         signalBus.extract_apk.connect(lambda res: self.callback_extractAPKFile(res))
 
@@ -167,6 +169,26 @@ class SafetyInterface(Check, Ui_SafetyInterface):
         self.uninstall_app_thread.run()
 
     @Check.checkRunCmd(check_device=True)
+    def startT_setAPPEnable(self, enable):
+        """start thread to set app enable"""
+        # get select app
+        w = MessageBox(self.t.risk_warning, self.t.safety_enable_app_warn if enable else self.t.safety_disable_app_warn,
+                       self.window())
+        if not w.exec():
+            return
+        package_name = list(self.select_app_info.keys())[0]
+        app_type = self.apps_info[package_name]['type']
+        if not enable and app_type == 'SYSTEM APP':
+            x = MessageBox(self.t.risk_warning,
+                           self.t.safety_disable_system_app_warn,
+                           self.window())
+            if not x.exec():
+                return
+        self.set_app_enable_thread = SetAPPEnable(package_name, enable)
+        self.set_app_enable_thread.SAE_signal.connect(lambda res: self.callback_setAPPEnable(res))
+        self.set_app_enable_thread.run()
+
+    @Check.checkRunCmd(check_device=True)
     def startT_extractAPKFile(self):
         """start thread to extract apk file"""
         path = QFileDialog.getExistingDirectory(
@@ -238,6 +260,29 @@ class SafetyInterface(Check, Ui_SafetyInterface):
             self.showMessageDialog(self.t.error_title, app_info.get('error'))
             return
 
+    def callback_setAPPEnable(self, res):
+        status = res.get('status')
+        error = res.get('error')
+        info = res.get('info')
+        set_type = info.get('type')
+        stdout = info.get('stdout')
+        if status == signalKey.SUCCESS:
+            if stdout.find('new state') != -1:
+                MessageBox(self.t.notification_title,
+                           self.t.safety_enable_success if set_type else self.t.safety_disable_success,
+                           self.window()).exec()
+                # change app enable state
+                package_name = list(self.select_app_info.keys())[0]
+                self.apps_info[package_name]['enable'] = set_type
+                # change button state
+                self.ButtonEnable.setEnabled(not set_type)
+                self.ButtonDisable.setEnabled(set_type)
+            else:
+                MessageBox(self.t.error_title, self.t.safety_set_app_enable_error, self.window()).exec()
+
+        else:
+            MessageBox(self.t.error_title, error, self.window()).exec()
+
     def addAppInfo(self, info):
         key = list(info.keys())[0]
         if not key:
@@ -252,7 +297,9 @@ class SafetyInterface(Check, Ui_SafetyInterface):
         self.AppList.setItem(0, 1, QTableWidgetItem(key))
 
 
+
 class ExtractAPKFile(QThread):
+    """QTHREAD: Extract APK File"""
 
     def __init__(self, path_list, parent=None):
         super().__init__(parent)
@@ -262,8 +309,21 @@ class ExtractAPKFile(QThread):
         signalBus.extract_apk.emit(adb.extractAPKFile(self.path_list))
         return
 
+class SetAPPEnable(QThread):
+    SAE_signal = pyqtSignal(dict)
+
+    def __init__(self, package_name, enable):
+        super().__init__()
+        self.package_name = package_name
+        self.enable = enable
+
+    def run(self):
+        res = adb.setAPPEnable(self.package_name, self.enable)
+        self.SAE_signal.emit(res)
+        return
 
 class UninstallAPP(QThread):
+    """QTHREAD: Uninstall APP"""
     UA_signal = pyqtSignal(dict)
 
     def __init__(self, package_name):
@@ -277,6 +337,7 @@ class UninstallAPP(QThread):
 
 
 class GetApps(QThread):
+    """QTHREAD: Get APPS"""
     GA_signal = pyqtSignal(dict)
 
     def __init__(self, parent=None):

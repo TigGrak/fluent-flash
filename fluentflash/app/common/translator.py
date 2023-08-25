@@ -50,7 +50,15 @@ class Translator(QObject):
         self.safety_uninstall_system_app_warn = self.tr(
             'This seems to be a system app. Uninstalling it could potentially cause system damage. Do you still want '
             'to uninstall it?')
+        self.safety_disable_app_warn = self.tr('Are you sure you want to disable this app?')
+        self.safety_disable_system_app_warn = self.tr(
+            'This seems to be a system app. Disabling it could potentially cause system damage. Do you still want to '
+            'disable it?')
+        self.safety_enable_app_warn = self.tr('Are you sure you want to enable this app?')
         self.safety_uninstall_success = self.tr('Uninstall Successful')
+        self.safety_disable_success = self.tr('Disable Successful')
+        self.safety_enable_success = self.tr('Enable Successful')
+        self.safety_set_app_enable_error = self.tr('Unable to modify app enable state. This might require you to enable ROOT mode.')
         self.NO_DATA = self.tr('NO DATA')
 
         self.choose_dir = self.tr('Choose a directory')
