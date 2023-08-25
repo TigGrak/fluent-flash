@@ -127,6 +127,28 @@ class SafetyInterface(Check, Ui_SafetyInterface):
             self.ButtonDisable.setEnabled(False)
             self.ButtonEnable.setEnabled(False)
 
+    def setAllEnable(self, state):
+        self.ButtonRefresh.setEnabled(state)
+        self.ButtonEtractAPKFile.setEnabled(state)
+        self.ButtonUninstall.setEnabled(state)
+        self.ButtonDisable.setEnabled(state)
+        self.ButtonEnable.setEnabled(state)
+        self.AppList.setEnabled(state)
+        self.AppList.setDisabled(not state)
+
+    def addAppInfo(self, info):
+        key = list(info.keys())[0]
+        if not key:
+            return
+        value = info[key]
+        lang = cfg.language.value.value.name().replace('_', '-')
+        name = value['name'].get(lang)
+        if name is None:
+            name = value['name'].get('all')
+        self.AppList.insertRow(0)
+        self.AppList.setItem(0, 0, QTableWidgetItem(name))
+        self.AppList.setItem(0, 1, QTableWidgetItem(key))
+
     @Check.checkRunCmd(check_device=True)
     def startT_refreshAPPList(self):
         """ start thread to refresh app list """
@@ -141,16 +163,6 @@ class SafetyInterface(Check, Ui_SafetyInterface):
         self.__setProgressVisible(True)
         self.ButtonRefresh.setEnabled(False)
         self.get_app_list_thread.start()
-
-    def setAllEnable(self, state):
-        self.ButtonRefresh.setEnabled(state)
-        self.ButtonEtractAPKFile.setEnabled(state)
-        self.ButtonUninstall.setEnabled(state)
-        self.ButtonDisable.setEnabled(state)
-        self.ButtonEnable.setEnabled(state)
-        self.AppList.setEnabled(state)
-
-        self.AppList.setDisabled(not state)
 
     @Check.checkRunCmd(check_device=True)
     def startT_uninstallAPP(self):
@@ -283,20 +295,6 @@ class SafetyInterface(Check, Ui_SafetyInterface):
         else:
             MessageBox(self.t.error_title, error, self.window()).exec()
 
-    def addAppInfo(self, info):
-        key = list(info.keys())[0]
-        if not key:
-            return
-        value = info[key]
-        lang = cfg.language.value.value.name().replace('_', '-')
-        name = value['name'].get(lang)
-        if name is None:
-            name = value['name'].get('all')
-        self.AppList.insertRow(0)
-        self.AppList.setItem(0, 0, QTableWidgetItem(name))
-        self.AppList.setItem(0, 1, QTableWidgetItem(key))
-
-
 
 class ExtractAPKFile(QThread):
     """QTHREAD: Extract APK File"""
@@ -308,6 +306,7 @@ class ExtractAPKFile(QThread):
     def run(self):
         signalBus.extract_apk.emit(adb.extractAPKFile(self.path_list))
         return
+
 
 class SetAPPEnable(QThread):
     SAE_signal = pyqtSignal(dict)
@@ -321,6 +320,7 @@ class SetAPPEnable(QThread):
         res = adb.setAPPEnable(self.package_name, self.enable)
         self.SAE_signal.emit(res)
         return
+
 
 class UninstallAPP(QThread):
     """QTHREAD: Uninstall APP"""
